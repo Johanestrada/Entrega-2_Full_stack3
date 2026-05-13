@@ -1,13 +1,13 @@
 package com.colegio.estudianteservice.service;
 
-import com.colegio.estudianteservice.factory.EstudianteFactory;
-import com.colegio.estudianteservice.model.Estudiante;
-import com.colegio.estudianteservice.repository.EstudianteRepository;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.colegio.estudianteservice.factory.EstudianteFactory;
+import com.colegio.estudianteservice.model.Estudiante;
+import com.colegio.estudianteservice.repository.EstudianteRepository;
 
 @Service
 public class EstudianteService {
@@ -31,5 +31,9 @@ public class EstudianteService {
 
     public List<Estudiante> listar() {
         return repository.findAll();
+    }
+
+    public Estudiante obtenerPorId(Long id) {
+        return repository.findById(id).orElse(null);
     }
 }

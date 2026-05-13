@@ -1,10 +1,11 @@
 package com.colegio.asistenciaservice.service;
 
-import com.colegio.asistenciaservice.model.Asistencia;
-import com.colegio.asistenciaservice.repository.AsistenciaRepository;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.colegio.asistenciaservice.model.Asistencia;
+import com.colegio.asistenciaservice.repository.AsistenciaRepository;
 
 @Service
 public class AsistenciaService {
@@ -21,5 +22,9 @@ public class AsistenciaService {
 
     public Asistencia guardar(Asistencia asistencia) {
         return repository.save(asistencia);
+    }
+
+    public List<Asistencia> listarPorEstudiante(String estudiante) {
+        return repository.findByEstudiante(estudiante);
     }
 }

@@ -8,6 +8,7 @@ Este proyecto implementa una plataforma académica basada en microservicios para
 - **evaluacion-service**: Microservicio para la gestión de evaluaciones.
 - **bff-service**: Backend For Frontend que orquesta y compone datos de los microservicios.
 - **eureka-server**: Servidor Eureka para el descubrimiento de servicios.
+- **frontend**: Aplicación React para consumir el BFF y mostrar los datos académicos.
 
 ## Tecnologías principales
 - Java 17
@@ -41,6 +42,12 @@ Este proyecto implementa una plataforma académica basada en microservicios para
    
    cd bff-service
    ./mvnw spring-boot:run
+   ```
+4. En otra terminal, instala y ejecuta el frontend React:
+   ```
+   cd frontend
+   npm install
+   npm run dev
    ```
 
 ## Documentación Swagger

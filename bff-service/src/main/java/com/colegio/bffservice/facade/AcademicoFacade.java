@@ -13,7 +13,6 @@ public class AcademicoFacade {
     private WebClient.Builder webClientBuilder;
 
     public AcademicoDTO obtenerDatosAcademicos(Long estudianteId) {
-        // Llamadas a microservicios (mock, puedes mejorar luego)
         var estudiante = webClientBuilder.build()
                 .get()
                 .uri("http://localhost:8081/estudiantes/" + estudianteId)
@@ -21,16 +20,44 @@ public class AcademicoFacade {
                 .bodyToMono(Object.class)
                 .block();
 
+        String nombreEstudiante = null;
+        if (estudiante instanceof java.util.Map<?, ?> estudianteMap) {
+            Object nombreValue = estudianteMap.get("nombre");
+            if (nombreValue != null) {
+                nombreEstudiante = nombreValue.toString();
+            }
+        }
+
+        if (nombreEstudiante == null || nombreEstudiante.isBlank()) {
+            return new AcademicoDTO(estudiante, List.of(), List.of());
+        }
+
+        // Usar el nombre extraído en las llamadas
+        final String nombreFinal = nombreEstudiante;
+
         var asistencias = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8082/asistencias/estudiante/" + estudianteId)
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("http")
+                        .host("localhost")
+                        .port(8082)
+                        .path("/asistencias/estudiante/{nombre}")
+                        .build(nombreFinal)
+                )
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();
 
         var evaluaciones = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8083/evaluaciones?estudianteId=" + estudianteId)
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("http")
+                        .host("localhost")
+                        .port(8083)
+                        .path("/evaluaciones")
+                        .queryParam("nombre", nombreFinal)
+                        .build()
+                )
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();

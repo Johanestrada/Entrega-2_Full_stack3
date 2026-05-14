@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './App.css';
 
 function App() {
   const [estudianteId, setEstudianteId] = useState('');
@@ -35,38 +36,49 @@ function App() {
 
   return (
     <main className="app-container">
-      <h1>Portal Académico</h1>
-      <p>Busca los datos combinados desde el BFF.</p>
+      <header className="header">
+        <h1>🎓 Portal Académico</h1>
+        <p>Consulta datos integrados desde el BFF</p>
+      </header>
 
       <form className="search-form" onSubmit={buscarAcademico}>
-        <label htmlFor="estudianteId">ID de estudiante</label>
         <input
           id="estudianteId"
           type="number"
           value={estudianteId}
           onChange={(event) => setEstudianteId(event.target.value)}
-          placeholder="Ej. 1"
+          placeholder="Ingresa ID de estudiante"
         />
-        <button type="submit">Buscar</button>
+        <button type="submit">🔍 Buscar</button>
       </form>
 
       {loading && <p className="info">Cargando...</p>}
       {error && <p className="error">{error}</p>}
 
       {data && (
-        <section className="result-card">
-          <h2>Resultados</h2>
-          <div className="result-block">
-            <h3>Estudiante</h3>
-            <pre>{JSON.stringify(data.estudiante, null, 2)}</pre>
+        <section className="cards-container">
+          <div className="card">
+            <h2>👤 Estudiante</h2>
+            <p><strong>Nombre:</strong> {data.estudiante?.nombre}</p>
+            <p><strong>Curso:</strong> {data.estudiante?.curso}</p>
           </div>
-          <div className="result-block">
-            <h3>Asistencias</h3>
-            <pre>{JSON.stringify(data.asistencias, null, 2)}</pre>
+
+          <div className="card">
+            <h2>📅 Asistencias</h2>
+            <ul>
+              {data.asistencias?.map((a, i) => (
+                <li key={i}>{a.fecha} - {a.presente ? 'Presente' : 'Ausente'}</li>
+              ))}
+            </ul>
           </div>
-          <div className="result-block">
-            <h3>Evaluaciones</h3>
-            <pre>{JSON.stringify(data.evaluaciones, null, 2)}</pre>
+
+          <div className="card">
+            <h2>📝 Evaluaciones</h2>
+            <ul>
+              {data.evaluaciones?.map((e, i) => (
+                <li key={i}>{e.materia}: {e.nota}</li>
+              ))}
+            </ul>
           </div>
         </section>
       )}

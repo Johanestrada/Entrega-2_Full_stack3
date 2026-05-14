@@ -25,4 +25,8 @@ public class EvaluacionService {
     public List<Evaluacion> listar() {
         return repository.findAll();
     }
+
+    public List<Evaluacion> listarPorNombre(String nombre) {
+        return repository.findByNombre(nombre);
+    }
 }

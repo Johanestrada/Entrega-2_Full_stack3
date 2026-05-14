@@ -35,6 +35,7 @@ public class AsistenciaController {
 
     @PostMapping
     public Asistencia guardar(@RequestBody Asistencia asistencia) {
+        asistencia.setId(null);
         return service.guardar(asistencia);
     }
 }

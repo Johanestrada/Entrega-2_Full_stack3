@@ -31,7 +31,7 @@ public class AsistenciaService {
     public Asistencia actualizar(Long id, Asistencia asistencia) {
         return repository.findById(id)
                 .map(actual -> {
-                    actual.setEstudiante(asistencia.getEstudiante());
+                    actual.setEstudianteId(asistencia.getEstudianteId());
                     actual.setFecha(asistencia.getFecha());
                     actual.setPresente(asistencia.isPresente());
                     return repository.save(actual);
@@ -44,6 +44,6 @@ public class AsistenciaService {
     }
 
     public List<Asistencia> listarPorEstudiante(String estudiante) {
-        return repository.findByEstudiante(estudiante);
+        return repository.findByEstudianteId(Long.valueOf(estudiante));
     }
 }

@@ -42,8 +42,11 @@ public class EvaluacionController {
 
     @PostMapping
     public Evaluacion guardar(@RequestBody Evaluacion evaluacion) {
+        if (evaluacion.getEstudianteId() == null) {
+            throw new IllegalArgumentException("estudianteId must be provided");
+        }
         return service.guardar(
-                evaluacion.getNombre(),
+                evaluacion.getEstudianteId() != null ? String.valueOf(evaluacion.getEstudianteId()) : null,
                 evaluacion.getMateria(),
                 evaluacion.getNota()
         );

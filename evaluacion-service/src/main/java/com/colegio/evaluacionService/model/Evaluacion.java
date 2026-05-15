@@ -12,7 +12,7 @@ public class Evaluacion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre;
+    private Long estudianteId;
     private String materia;
     private Double nota;
 
@@ -21,7 +21,7 @@ public class Evaluacion {
 
     public Evaluacion(Long id, String nombre, String materia, Double nota) {
         this.id = id;
-        this.nombre = nombre;
+        this.estudianteId = nombre != null ? Long.valueOf(nombre) : null;
         this.materia = materia;
         this.nota = nota;
     }
@@ -34,12 +34,12 @@ public class Evaluacion {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public Long getEstudianteId() {
+        return estudianteId;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setEstudianteId(Long estudianteId) {
+        this.estudianteId = estudianteId;
     }
 
     public String getMateria() {

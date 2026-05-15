@@ -1,6 +1,9 @@
 package com.colegio.estudianteservice.controller;
 
 import java.util.List;
+import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,8 @@ public class EstudianteController {
     @Autowired
     private EstudianteService service;
 
+    private static final Logger logger = LoggerFactory.getLogger(EstudianteController.class);
+
     @GetMapping
     public List<Estudiante> listar() {
         return service.listar();
@@ -33,6 +38,8 @@ public class EstudianteController {
     public Estudiante guardar(
             @RequestBody Estudiante estudiante
     ) {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("[requestId={}] POST /estudiantes - recibida solicitud de creación: nombre='{}', curso='{}'", requestId, estudiante.getNombre(), estudiante.getCurso());
         return service.guardar(
                 estudiante.getNombre(),
                 estudiante.getCurso()

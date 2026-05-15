@@ -13,6 +13,7 @@ public class AcademicoController {
     private AcademicoFacade facade;
 
     @GetMapping("/{estudianteId}")
+    @CrossOrigin(origins = "http://localhost:4173")
     public AcademicoDTO obtenerDatosAcademicos(@PathVariable Long estudianteId) {
         return facade.obtenerDatosAcademicos(estudianteId);
     }

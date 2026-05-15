@@ -24,6 +24,25 @@ public class AsistenciaService {
         return repository.save(asistencia);
     }
 
+    public Asistencia obtenerPorId(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    public Asistencia actualizar(Long id, Asistencia asistencia) {
+        return repository.findById(id)
+                .map(actual -> {
+                    actual.setEstudiante(asistencia.getEstudiante());
+                    actual.setFecha(asistencia.getFecha());
+                    actual.setPresente(asistencia.isPresente());
+                    return repository.save(actual);
+                })
+                .orElse(null);
+    }
+
+    public void eliminar(Long id) {
+        repository.deleteById(id);
+    }
+
     public List<Asistencia> listarPorEstudiante(String estudiante) {
         return repository.findByEstudiante(estudiante);
     }

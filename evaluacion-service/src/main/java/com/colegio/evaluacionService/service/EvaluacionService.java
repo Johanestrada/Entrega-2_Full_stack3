@@ -26,6 +26,25 @@ public class EvaluacionService {
         return repository.findAll();
     }
 
+    public Evaluacion obtenerPorId(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    public Evaluacion actualizar(Long id, Evaluacion evaluacion) {
+        return repository.findById(id)
+                .map(actual -> {
+                    actual.setNombre(evaluacion.getNombre());
+                    actual.setMateria(evaluacion.getMateria());
+                    actual.setNota(evaluacion.getNota());
+                    return repository.save(actual);
+                })
+                .orElse(null);
+    }
+
+    public void eliminar(Long id) {
+        repository.deleteById(id);
+    }
+
     public List<Evaluacion> listarPorNombre(String nombre) {
         return repository.findByNombre(nombre);
     }

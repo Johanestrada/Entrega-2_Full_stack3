@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - '8761:8761'
+
+  estudiante-service:
+    build: ./estudiante-service
+    ports:
+      - '8081:8081'
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+  asistencia-service:
+    build: ./asistencia-service
+    ports:
+      - '8082:8082'
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+  evaluacion-service:
+    build: ./evaluacion-service
+    ports:
+      - '8083:8083'
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+  bff-service:
+    build: ./bff-service
+    ports:
+      - '8084:8084'
+    depends_on:
+      - eureka-server
+      - estudiante-service
+      - asistencia-service
+      - evaluacion-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - ESTUDIANTE_SERVICE_URL=http://estudiante-service:8081
+      - ASISTENCIA_SERVICE_URL=http://asistencia-service:8082
+      - EVALUACION_SERVICE_URL=http://evaluacion-service:8083
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '4173:4173'
+    depends_on:
+      - bff-service
+    environment:
+      - VITE_BFF_URL=http://localhost:8084

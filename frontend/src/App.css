@@ -1,27 +1,62 @@
+/* General */
 .app-container {
   font-family: Arial, sans-serif;
-  padding: 2rem;
   background: #f4f6f9;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.header {
+/* Header */
+.site-header {
+  background: #0077ff;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-header h1 {
+  margin: 0;
+}
+
+.site-header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.site-header nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.site-header nav a:hover {
+  text-decoration: underline;
+}
+
+/* Main */
+.main-content {
+  flex: 1;
+  padding: 2rem;
   text-align: center;
-  margin-bottom: 2rem;
 }
 
 .search-form {
+  margin: 1rem 0;
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
 }
 
 .search-form input {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 250px;
 }
 
 .search-form button {
@@ -37,11 +72,13 @@
   background: #005fcc;
 }
 
+/* Cards */
 .cards-container {
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
   justify-content: center;
+  margin-top: 2rem;
 }
 
 .card {
@@ -57,12 +94,11 @@
   color: #0077ff;
 }
 
-.error {
-  color: red;
+/* Footer */
+.site-footer {
+  background: #222;
+  color: #ddd;
   text-align: center;
+  padding: 1rem;
 }
 
-.info {
-  text-align: center;
-  color: #555;
-}

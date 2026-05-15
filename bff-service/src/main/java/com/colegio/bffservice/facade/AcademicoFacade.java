@@ -2,6 +2,7 @@ package com.colegio.bffservice.facade;
 
 import com.colegio.bffservice.model.AcademicoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
@@ -12,10 +13,19 @@ public class AcademicoFacade {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @Value("${estudiante.service.url:http://localhost:8081}")
+    private String estudianteServiceUrl;
+
+    @Value("${asistencia.service.url:http://localhost:8082}")
+    private String asistenciaServiceUrl;
+
+    @Value("${evaluacion.service.url:http://localhost:8083}")
+    private String evaluacionServiceUrl;
+
     public AcademicoDTO obtenerDatosAcademicos(Long estudianteId) {
         var estudiante = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/estudiantes/" + estudianteId)
+                .uri(estudianteServiceUrl + "/estudiantes/" + estudianteId)
                 .retrieve()
                 .bodyToMono(Object.class)
                 .block();
@@ -37,27 +47,14 @@ public class AcademicoFacade {
 
         var asistencias = webClientBuilder.build()
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .scheme("http")
-                        .host("localhost")
-                        .port(8082)
-                        .path("/asistencias/estudiante/{nombre}")
-                        .build(nombreFinal)
-                )
+                .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + nombreFinal)
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();
 
         var evaluaciones = webClientBuilder.build()
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .scheme("http")
-                        .host("localhost")
-                        .port(8083)
-                        .path("/evaluaciones")
-                        .queryParam("nombre", nombreFinal)
-                        .build()
-                )
+                .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + nombreFinal)
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();

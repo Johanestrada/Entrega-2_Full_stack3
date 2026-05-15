@@ -2,6 +2,7 @@ package com.colegio.bffservice.facade;
 
 import com.colegio.bffservice.model.AcademicoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
@@ -12,25 +13,48 @@ public class AcademicoFacade {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @Value("${estudiante.service.url:http://localhost:8081}")
+    private String estudianteServiceUrl;
+
+    @Value("${asistencia.service.url:http://localhost:8082}")
+    private String asistenciaServiceUrl;
+
+    @Value("${evaluacion.service.url:http://localhost:8083}")
+    private String evaluacionServiceUrl;
+
     public AcademicoDTO obtenerDatosAcademicos(Long estudianteId) {
-        // Llamadas a microservicios (mock, puedes mejorar luego)
         var estudiante = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/estudiantes/" + estudianteId)
+                .uri(estudianteServiceUrl + "/estudiantes/" + estudianteId)
                 .retrieve()
                 .bodyToMono(Object.class)
                 .block();
 
+        String nombreEstudiante = null;
+        if (estudiante instanceof java.util.Map<?, ?> estudianteMap) {
+            Object nombreValue = estudianteMap.get("nombre");
+            if (nombreValue != null) {
+                nombreEstudiante = nombreValue.toString();
+            }
+        }
+
+        if (nombreEstudiante == null || nombreEstudiante.isBlank()) {
+            return new AcademicoDTO(estudiante, List.of(), List.of());
+        }
+
+        // Usar el nombre extraído en las llamadas
+        final String nombreFinal = nombreEstudiante;
+
         var asistencias = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8082/asistencias/estudiante/" + estudianteId)
+                .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + nombreFinal)
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();
 
         var evaluaciones = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8083/evaluaciones?estudianteId=" + estudianteId)
+                .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + nombreFinal)
                 .retrieve()
                 .bodyToMono(List.class)
                 .block();

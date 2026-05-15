@@ -14,7 +14,7 @@ public class Asistencia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String estudiante;
+    private Long estudianteId;
 
     private String fecha;
 

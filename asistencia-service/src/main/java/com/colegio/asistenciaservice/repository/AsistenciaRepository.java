@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.colegio.asistenciaservice.model.Asistencia;
 
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
-	List<Asistencia> findByEstudiante(String estudiante);
+	List<Asistencia> findByEstudianteId(Long estudianteId);
 }

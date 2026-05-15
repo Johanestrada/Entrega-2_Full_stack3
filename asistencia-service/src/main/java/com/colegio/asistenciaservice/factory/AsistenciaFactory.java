@@ -4,11 +4,11 @@ import com.colegio.asistenciaservice.model.Asistencia;
 
 public class AsistenciaFactory {
 
-    public static Asistencia crear(String estudiante, String fecha) {
+    public static Asistencia crear(Long estudianteId, String fecha) {
 
         Asistencia asistencia = new Asistencia();
 
-        asistencia.setEstudiante(estudiante);
+        asistencia.setEstudianteId(estudianteId);
         asistencia.setFecha(fecha);
         asistencia.setPresente(true);
 

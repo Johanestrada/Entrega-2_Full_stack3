@@ -38,26 +38,20 @@ public class AcademicoFacade {
             }
         }
 
-        if (nombreEstudiante == null || nombreEstudiante.isBlank()) {
-            return new AcademicoDTO(estudiante, List.of(), List.of());
-        }
-
-        // Usar el nombre extraído en las llamadas
-        final String nombreFinal = nombreEstudiante;
-
+        // Usar el estudianteId en las llamadas a asistencia/evaluacion
         var asistencias = webClientBuilder.build()
-                .get()
-                .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + nombreFinal)
-                .retrieve()
-                .bodyToMono(List.class)
-                .block();
+            .get()
+            .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + estudianteId)
+            .retrieve()
+            .bodyToMono(List.class)
+            .block();
 
         var evaluaciones = webClientBuilder.build()
-                .get()
-                .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + nombreFinal)
-                .retrieve()
-                .bodyToMono(List.class)
-                .block();
+            .get()
+            .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + estudianteId)
+            .retrieve()
+            .bodyToMono(List.class)
+            .block();
 
         return new AcademicoDTO(estudiante, asistencias, evaluaciones);
     }

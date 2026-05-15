@@ -37,13 +37,16 @@ public class AsistenciaController {
         return service.obtenerPorId(id);
     }
 
-    @GetMapping("/estudiante/{nombre}")
-    public List<Asistencia> listarPorEstudiante(@PathVariable String nombre) {
-        return service.listarPorEstudiante(nombre);
+    @GetMapping("/estudiante/{estudianteId}")
+    public List<Asistencia> listarPorEstudiante(@PathVariable Long estudianteId) {
+        return service.listarPorEstudiante(String.valueOf(estudianteId));
     }
 
     @PostMapping
     public Asistencia guardar(@RequestBody Asistencia asistencia) {
+        if (asistencia.getEstudianteId() == null) {
+            throw new IllegalArgumentException("estudianteId must be provided");
+        }
         asistencia.setId(null);
         return service.guardar(asistencia);
     }

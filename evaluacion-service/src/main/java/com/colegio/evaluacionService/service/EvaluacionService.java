@@ -16,7 +16,12 @@ public class EvaluacionService {
 
     public Evaluacion guardar(String nombre, String materia, Double nota) {
         Evaluacion evaluacion = new Evaluacion();
-        evaluacion.setNombre(nombre);
+        // expect 'nombre' to be estudianteId as string or pass estudianteId directly from client
+        try {
+            evaluacion.setEstudianteId(nombre != null ? Long.valueOf(nombre) : null);
+        } catch (NumberFormatException ex) {
+            evaluacion.setEstudianteId(null);
+        }
         evaluacion.setMateria(materia);
         evaluacion.setNota(nota);
         return repository.save(evaluacion);
@@ -33,7 +38,7 @@ public class EvaluacionService {
     public Evaluacion actualizar(Long id, Evaluacion evaluacion) {
         return repository.findById(id)
                 .map(actual -> {
-                    actual.setNombre(evaluacion.getNombre());
+                    actual.setEstudianteId(evaluacion.getEstudianteId());
                     actual.setMateria(evaluacion.getMateria());
                     actual.setNota(evaluacion.getNota());
                     return repository.save(actual);
@@ -46,6 +51,11 @@ public class EvaluacionService {
     }
 
     public List<Evaluacion> listarPorNombre(String nombre) {
-        return repository.findByNombre(nombre);
+        try {
+            Long id = Long.valueOf(nombre);
+            return repository.findByEstudianteId(id);
+        } catch (NumberFormatException ex) {
+            return List.of();
+        }
     }
 }

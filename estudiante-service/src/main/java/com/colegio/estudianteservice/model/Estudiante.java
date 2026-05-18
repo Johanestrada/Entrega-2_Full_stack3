@@ -9,6 +9,8 @@ public class Estudiante {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String run;
+
     private String nombre;
 
     private String curso;
@@ -18,10 +20,12 @@ public class Estudiante {
 
     public Estudiante(
             Long id,
+            String run,
             String nombre,
             String curso
     ) {
         this.id = id;
+        this.run = run;
         this.nombre = nombre;
         this.curso = curso;
     }
@@ -32,6 +36,14 @@ public class Estudiante {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getRun() {
+        return run;
+    }
+
+    public void setRun(String run) {
+        this.run = run;
     }
 
     public String getNombre() {

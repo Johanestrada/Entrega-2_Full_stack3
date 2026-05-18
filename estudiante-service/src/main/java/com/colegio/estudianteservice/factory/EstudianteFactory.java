@@ -6,7 +6,8 @@ public class EstudianteFactory {
 
     public static Estudiante crear(
             String nombre,
-            String curso
+            String curso,
+            String run
     ) {
 
         Estudiante estudiante =
@@ -14,6 +15,7 @@ public class EstudianteFactory {
 
         estudiante.setNombre(nombre);
         estudiante.setCurso(curso);
+        estudiante.setRun(run);
 
         return estudiante;
     }

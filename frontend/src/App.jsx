@@ -1,51 +1,83 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
-import { useAcademicData } from './hooks/useAcademicData';
-import SearchForm from './components/SearchForm';
-import AcademicCards from './components/AcademicCards';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
-  const [estudianteId, setEstudianteId] = useState('');
-  const { data, error, loading, buscarAcademico } = useAcademicData();
+  const [user, setUser] = useState(null);
 
-  const handleBuscarAcademico = async (event) => {
-    event.preventDefault();
-    await buscarAcademico(estudianteId);
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
+
+  const handleLogin = ({ username, token }) => {
+    setUser({ username, token });
+  };
+
+  const handleLogout = () => {
+    setUser(null);
   };
 
   return (
-    <div className="app-container">
-      <header className="site-header">
-        <h1>🎓 Portal Académico</h1>
-        <nav>
-          <ul>
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Estudiantes</a></li>
-            <li><a href="#">Evaluaciones</a></li>
-            <li><a href="#">Contacto</a></li>
-          </ul>
-        </nav>
-      </header>
+    <BrowserRouter>
+      <div className="app-container">
+        
+        {/* HEADER MODIFICADO: Se eliminó el div intermedio innecesario */}
+        <header className="site-header">
+          <h1>🎓 Portal Académico</h1>
+          
+          <nav>
+            <ul>
+              <li><Link to="/">Inicio</Link></li>
+              <li><Link to="/login">Login</Link></li>
+              {user && <li><Link to="/dashboard">Panel</Link></li>}
+            </ul>
+          </nav>
 
-      <main className="main-content">
-        <p>Busca los datos combinados desde el BFF.</p>
+          <div className="auth-actions">
+            {user ? (
+              <>
+                <span className="user">{user.username}</span>
+                <button onClick={handleLogout}>Salir</button>
+              </>
+            ) : (
+              <span className="user">No has iniciado sesión</span>
+            )}
+          </div>
+        </header>
 
-        <SearchForm
-          estudianteId={estudianteId}
-          onSetEstudianteId={setEstudianteId}
-          onBuscarAcademico={handleBuscarAcademico}
-        />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/dashboard"
+              element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
 
-        {loading && <p className="info">Cargando...</p>}
-        {error && <p className="error">{error}</p>}
-
-        {data && <AcademicCards data={data} />}
-      </main>
-
-      <footer className="site-footer">
-        <p>&copy; 2026 Portal Académico. Todos los derechos reservados.</p>
-      </footer>
-    </div>
+        <footer className="site-footer">
+          <p>&copy; 2026 Portal Académico. Todos los derechos reservados.</p>
+        </footer>
+      </div>
+    </BrowserRouter>
   );
 }
 

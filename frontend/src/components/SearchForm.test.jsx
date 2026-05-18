@@ -3,23 +3,26 @@ import { test, expect, vi } from 'vitest';
 import SearchForm from './SearchForm';
 
 test('renderiza el formulario de búsqueda y responde al cambio de input', () => {
-  const setEstudianteId = vi.fn();
+  const setQuery = vi.fn();
+  const setMode = vi.fn();
   const buscarAcademico = vi.fn((event) => event.preventDefault());
 
   render(
     <SearchForm
-      estudianteId="123"
-      onSetEstudianteId={setEstudianteId}
+      query="123"
+      onSetQuery={setQuery}
+      mode="run"
+      onSetMode={setMode}
       onBuscarAcademico={buscarAcademico}
     />
   );
 
-  expect(screen.getByPlaceholderText('Ingresa ID de estudiante')).toBeTruthy();
+  expect(screen.getByPlaceholderText('Ingresa RUN de estudiante')).toBeTruthy();
   expect(screen.getByRole('button', { name: /buscar/i })).toBeTruthy();
 
-  fireEvent.change(screen.getByPlaceholderText('Ingresa ID de estudiante'), {
+  fireEvent.change(screen.getByPlaceholderText('Ingresa RUN de estudiante'), {
     target: { value: '456' },
   });
 
-  expect(setEstudianteId).toHaveBeenCalledWith('456');
+  expect(setQuery).toHaveBeenCalledWith('456');
 });

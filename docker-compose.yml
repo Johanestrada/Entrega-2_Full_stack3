@@ -47,10 +47,11 @@ services:
       - EVALUACION_SERVICE_URL=http://evaluacion-service:8083
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_BFF_URL: http://localhost:8184
     ports:
       - '4173:4173'
     depends_on:
       - bff-service
-    environment:
-      - VITE_BFF_URL=http://localhost:8184

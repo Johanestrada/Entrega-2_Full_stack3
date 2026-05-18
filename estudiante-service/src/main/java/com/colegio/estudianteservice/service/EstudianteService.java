@@ -17,13 +17,15 @@ public class EstudianteService {
 
     public Estudiante guardar(
             String nombre,
-            String curso
+            String curso,
+            String run
     ) {
 
         Estudiante estudiante =
                 EstudianteFactory.crear(
                         nombre,
-                        curso
+                        curso,
+                        run
                 );
 
         return repository.save(estudiante);
@@ -37,11 +39,18 @@ public class EstudianteService {
         return repository.findById(id).orElse(null);
     }
 
+    public Estudiante obtenerPorRun(String run) {
+        return repository.findByRun(run);
+    }
+    public List<Estudiante> listarPorCurso(String curso) {
+        return repository.findByCurso(curso);
+    }
     public Estudiante actualizar(Long id, Estudiante estudiante) {
         return repository.findById(id)
                 .map(actual -> {
                     actual.setNombre(estudiante.getNombre());
                     actual.setCurso(estudiante.getCurso());
+                    actual.setRun(estudiante.getRun());
                     return repository.save(actual);
                 })
                 .orElse(null);

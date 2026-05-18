@@ -39,16 +39,27 @@ public class EstudianteController {
             @RequestBody Estudiante estudiante
     ) {
         String requestId = UUID.randomUUID().toString();
-        logger.info("[requestId={}] POST /estudiantes - recibida solicitud de creación: nombre='{}', curso='{}'", requestId, estudiante.getNombre(), estudiante.getCurso());
+        logger.info("[requestId={}] POST /estudiantes - recibida solicitud de creación: nombre='{}', curso='{}', run='{}'", requestId, estudiante.getNombre(), estudiante.getCurso(), estudiante.getRun());
         return service.guardar(
                 estudiante.getNombre(),
-                estudiante.getCurso()
+                estudiante.getCurso(),
+                estudiante.getRun()
         );
     }
 
     @GetMapping("/{id}")
     public Estudiante obtenerPorId(@PathVariable Long id) {
         return service.obtenerPorId(id);
+    }
+
+    @GetMapping("/run/{run}")
+    public Estudiante obtenerPorRun(@PathVariable String run) {
+        return service.obtenerPorRun(run);
+    }
+
+    @GetMapping("/curso/{curso}")
+    public List<Estudiante> listarPorCurso(@PathVariable String curso) {
+        return service.listarPorCurso(curso);
     }
 
     @PutMapping("/{id}")

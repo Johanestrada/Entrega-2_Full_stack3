@@ -55,4 +55,8 @@ public class EvaluacionService {
             return List.of();
         }
     }
+
+    public List<Evaluacion> obtenerPorEstudiante(Long estudianteId) {
+        return repository.findByEstudianteId(estudianteId);
+    }
 }

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { getAcademicDataByRun, postAttendanceStudent, getStudentsByCourse } from '../services/academicApi';
 import SearchForm from './SearchForm';
-import './Manager.css';
-
 export default function AsistenciaManager() {
   const [estudiantes, setEstudiantes] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -80,80 +78,102 @@ export default function AsistenciaManager() {
   };
 
   return (
-    <div className="manager-container">
-      <div className="manager-header">
-        <h2>Gestión de Asistencias</h2>
-      </div>
-      {selectedStudent && (
-        <div className="form-section">
-          <h3>Registrar Asistencia para {selectedStudent.nombre}</h3>
-          <form onSubmit={handleAddAttendance} className="manager-form">
-            <div className="form-group">
-              <label htmlFor="presente">Estado</label>
-              <select id="presente" value={presente} onChange={(e) => setPresente(e.target.value === 'true')}>
+    <div className="manager-wrapper">
+      <div className="manager-container">
+        <header className="manager-header">
+          <h1>Gestión de Asistencias</h1>
+          <p>Busca estudiantes por curso y registra su asistencia diaria.</p>
+        </header>
+
+        {error && (
+          <div className="manager-section" style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2', color: '#b91c1c' }}>
+            <p style={{ fontWeight: '600' }}>Error</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        <section className="manager-section">
+          <h2>Buscar Estudiantes</h2>
+          <SearchForm
+            query={query}
+            onSetQuery={setQuery}
+            mode={mode}
+            onSetMode={setMode}
+            onBuscarAcademico={handleSearch}
+          />
+        </section>
+
+        {selectedStudent && (
+          <section className="form-add">
+            <h3>Marcar asistencia para <span style={{ color: '#10b981' }}>{selectedStudent.nombre}</span></h3>
+            <form onSubmit={handleAddAttendance}>
+              <select value={presente} onChange={(e) => setPresente(e.target.value === 'true')}>
                 <option value={true}>Presente</option>
                 <option value={false}>Ausente</option>
               </select>
-            </div>
-            <button type="submit" className="btn-success">Guardar Asistencia</button>
-          </form>
-        </div>
-      )}
+              <button type="submit" className="btn-add-asistencia">Guardar Asistencia</button>
+            </form>
+          </section>
+        )}
 
-      <div className="form-section">
-        <h3>Buscar Estudiantes</h3>
-        <SearchForm query={query} onSetQuery={setQuery} mode={mode} onSetMode={setMode} onBuscarAcademico={handleSearch} />
-      </div>
+        <section>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h2>Resultados de la búsqueda</h2>
+            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+              Haz click en el nombre para ver el historial de asistencias.
+            </p>
+          </div>
 
-      {status === 'loading' && <p>Buscando...</p>}
-      {status === 'error' && <p className="error">{error}</p>}
-
-      <div className="table-section">
-        {status === 'success' && (
-          <>
-            <h3 className="text-xl font-semibold mb-4">Resultados de la Búsqueda</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {estudiantes.map((student) => (
-                <div key={student.id} className="border rounded p-4 bg-gray-50">
-                  <button
-                    onClick={() => toggleStudentDetails(student)}
-                    className="w-full text-left font-semibold text-blue-600 hover:underline"
-                  >
-                    {student.nombre} ({student.run})
-                    {expandedStudent?.id === student.id ? ' ▼' : ' ▶'}
-                  </button>
-
-                  {expandedStudent?.id === student.id && (
-                    <div className="mt-4 bg-white p-4 rounded border-t-2">
-                      <h3 className="font-bold mb-3">Asistencias:</h3>
-                      {asistencias.length > 0 ? (
-                        <ul className="space-y-2">
-                          {asistencias.map((asistencia) => (
-                            <li key={asistencia.id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                              <span>{new Date(asistencia.fecha).toLocaleDateString()}</span>
-                              <span className={asistencia.presente ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                                {asistencia.presente ? 'Presente' : 'Ausente'}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-gray-500">Sin registros de asistencia.</p>
-                      )}
+          <div className="student-grid">
+            {estudiantes.map((student) => (
+              <article key={student.id} className="student-card">
+                <button
+                  onClick={() => toggleStudentDetails(student)}
+                  className="student-card-header"
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h4>{student.nombre}</h4>
+                      <p>RUN {student.run}</p>
                     </div>
-                  )}
+                    <div className="toggle-icon">
+                      {expandedStudent?.id === student.id ? '▼' : '▶'}
+                    </div>
+                  </div>
+                </button>
 
+                {expandedStudent?.id === student.id && (
+                  <div className="student-details">
+                    <h5>Asistencias</h5>
+                    {asistencias.length > 0 ? (
+                      <ul className="details-list">
+                        {asistencias.map((asistencia) => (
+                          <li key={asistencia.id}>
+                            <span>{new Date(asistencia.fecha).toLocaleDateString()}</span>
+                            <span className={asistencia.presente ? 'asistencia-presente' : 'asistencia-ausente'}>
+                              {asistencia.presente ? 'Presente' : 'Ausente'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Sin registros de asistencia.</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="card-actions">
                   <button
                     onClick={() => handleSelectStudent(student)}
-                    className="mt-2 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                    className="btn-add-asistencia"
                   >
                     Marcar Asistencia
                   </button>
                 </div>
-              ))}
-            </div>
-          </>
-        )}
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

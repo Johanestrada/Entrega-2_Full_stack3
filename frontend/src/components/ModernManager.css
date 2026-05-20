@@ -1,0 +1,180 @@
+/* ModernManager.css */
+
+/* --- Contenedor Principal --- */
+.manager-wrapper {
+  min-height: 100vh;
+  background-color: #f0f4f8; /* Un gris azulado muy claro */
+  padding: 2rem;
+  font-family: 'Inter', sans-serif; /* O una fuente moderna que prefieras */
+}
+
+.manager-container {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+/* --- Cabecera --- */
+.manager-header {
+  margin-bottom: 2rem;
+}
+
+.manager-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b; /* Azul oscuro casi negro */
+  letter-spacing: -0.025em;
+}
+
+.manager-header p {
+  font-size: 1.125rem;
+  color: #64748b; /* Gris medio */
+  margin-top: 0.5rem;
+}
+
+/* --- Secciones (Búsqueda, Formularios) --- */
+.manager-section {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  margin-bottom: 2rem;
+}
+
+.manager-section h2, .manager-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Tarjetas de Estudiantes --- */
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.student-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+.student-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.student-card-header {
+  width: 100%;
+  padding: 1.5rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.student-card-header:hover h4 {
+  color: #0ea5e9; /* Azul cielo */
+}
+
+.student-card-header h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a8a; /* Azul oscuro */
+  transition: color 0.3s ease;
+}
+
+.student-card-header p {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.student-card-header .toggle-icon {
+  font-size: 1.25rem;
+  color: #94a3b8;
+}
+
+/* --- Detalles expandidos --- */
+.student-details {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.student-details h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.details-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.details-list .nota-buena { color: #166534; font-weight: 700; }
+.details-list .nota-regular { color: #a16207; font-weight: 700; }
+.details-list .nota-mala { color: #991b1b; font-weight: 700; }
+
+.details-list .asistencia-presente { color: #16a34a; font-weight: 600; }
+.details-list .asistencia-ausente { color: #dc2626; font-weight: 600; }
+
+/* --- Botones de Acción en Tarjeta --- */
+.card-actions {
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem;
+  background-color: #f8fafc;
+}
+
+.card-actions button {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-add-eval { background-color: #0ea5e9; color: white; }
+.btn-add-eval:hover { background-color: #0284c7; }
+
+.btn-add-asistencia { background-color: #10b981; color: white; }
+.btn-add-asistencia:hover { background-color: #059669; }
+
+/* --- Formularios --- */
+.form-add {
+  border: 2px dashed #cbd5e1;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-add h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.form-add form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

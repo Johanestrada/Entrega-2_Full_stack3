@@ -1,132 +1,264 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getStudentsByCourse, getAcademicDataByRun, postNewEvaluation } from '../services/academicApi';
 import SearchForm from './SearchForm';
-import './Manager.css';
 
+import './ModernManager.css';
 export default function EvaluacionManager() {
+  const [reactMontado, setReactMontado] = useState(false);
   const [estudiantes, setEstudiantes] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null); // Para saber a quién calificar
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [evaluaciones, setEvaluaciones] = useState([]);
+  const [expandedStudent, setExpandedStudent] = useState(null);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
-
-  // Estados para la búsqueda
   const [query, setQuery] = useState('');
-  const [mode, setMode] = useState('curso'); // Empezar por curso
-
-  // Estados para la nueva evaluación
+  const [mode, setMode] = useState('curso');
   const [materia, setMateria] = useState('');
   const [nota, setNota] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editNota, setEditNota] = useState('');
+
+  useEffect(() => {
+    setReactMontado(true);
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query) return;
+    if (!query.trim()) return;
 
     setStatus('loading');
     setError(null);
-    setEstudiantes([]);
-    setSelectedStudent(null);
 
     try {
-      let data;
-      if (mode === 'curso') {
-        data = await getStudentsByCourse(query);
-      } else { // mode === 'run'
-        const resumen = await getAcademicDataByRun(query);
-        data = resumen && resumen.estudiante ? [resumen.estudiante] : [];
-      }
-      setEstudiantes(data);
+      const data = await getStudentsByCourse(query);
+      setEstudiantes(data || []);
       setStatus('success');
+      setExpandedStudent(null);
+      setEvaluaciones([]);
     } catch (err) {
-      setError(err.message || 'No se pudo encontrar la información.');
+      setError(err.message || 'Error al buscar estudiantes.');
       setStatus('error');
     }
   };
 
   const handleSelectStudent = (student) => {
-    setSelectedStudent(selectedStudent?.id === student.id ? null : student);
-    // Limpiar campos del formulario
+    setSelectedStudent(student);
     setMateria('');
     setNota('');
+    setEditingId(null);
+    setError(null);
   };
 
   const handleAddEvaluation = async (e) => {
     e.preventDefault();
-    if (!selectedStudent) {
-      setError('Error: No hay un estudiante seleccionado.');
+    if (!selectedStudent || !materia || !nota) {
+      setError('Completa todos los campos.');
       return;
     }
+
     try {
-      await postNewEvaluation({ estudianteId: selectedStudent.id, materia, nota });
-      alert(`Evaluación registrada para ${selectedStudent.nombre}`);
-      setSelectedStudent(null); // Ocultar el formulario
+      await postNewEvaluation({
+        estudianteId: selectedStudent.id,
+        materia,
+        nota: parseFloat(nota),
+      });
+
+      // Recargar evaluaciones del estudiante desde el servidor
+      const data = await getAcademicDataByRun(selectedStudent.run);
+      setEvaluaciones(data.evaluaciones || []);
+      setExpandedStudent(selectedStudent);
+
+      setSelectedStudent(null);
+      setMateria('');
+      setNota('');
+      setError(null);
     } catch (err) {
-      console.error("Error al agregar evaluación:", err);
-      setError('No se pudo agregar la evaluación. Inténtalo de nuevo.');
+      setError(err.message || 'No se pudo agregar la evaluación.');
     }
   };
 
+  const handleEditEvaluacion = async (evaluacionId) => {
+    if (!editNota || editNota < 1 || editNota > 7) {
+      setError('La nota debe estar entre 1 y 7.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8084/academico/evaluaciones/${evaluacionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: evaluacionId, nota: parseFloat(editNota) }),
+      });
+
+      if (!response.ok) throw new Error('Error al actualizar evaluación');
+
+      setEvaluaciones(evaluaciones.map(e => 
+        e.id === evaluacionId ? { ...e, nota: parseFloat(editNota) } : e
+      ));
+      setEditingId(null);
+      setEditNota('');
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'No se pudo actualizar la evaluación.');
+    }
+  };
+
+  const handleDeleteEvaluacion = async (evaluacionId) => {
+    if (!window.confirm('¿Eliminar esta evaluación?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:8084/academico/evaluaciones/${evaluacionId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar evaluación.');
+
+      setEvaluaciones(evaluaciones.filter((e) => e.id !== evaluacionId));
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'No se pudo eliminar la evaluación.');
+    }
+  };
+
+  const toggleStudentDetails = async (student) => {
+    if (expandedStudent?.id === student.id) {
+      setExpandedStudent(null);
+      setEvaluaciones([]);
+      return;
+    }
+
+    try {
+      const data = await getAcademicDataByRun(student.run);
+      setEvaluaciones(data.evaluaciones || []);
+      setExpandedStudent(student);
+      setError(null);
+    } catch (err) {
+      setError('Error al cargar las evaluaciones.');
+    }
+  };
+
+  const getNotaColor = (nota) => {
+    const n = parseFloat(nota);
+    if (n >= 6) return 'bg-green-50 border-green-300';
+    if (n >= 5) return 'bg-yellow-50 border-yellow-300';
+    return 'bg-red-50 border-red-300';
+  };
+
+  const getPromedioColor = (notas) => {
+    if (!notas || notas.length === 0) return 'text-gray-400';
+    const promedio = notas.reduce((acc, it) => acc + parseFloat(it.nota), 0) / notas.length;
+    if (promedio >= 6) return 'text-green-600';
+    if (promedio >= 5) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
   return (
-    <div className="manager-container">
-      <div className="manager-header">
-        <h2>Gestión de Evaluaciones</h2>
-      </div>
-      {selectedStudent && (
-        <div className="form-section">
-          <h3>Nueva Evaluación para {selectedStudent.nombre}</h3>
-          <form onSubmit={handleAddEvaluation} className="manager-form">
-            <div className="form-group">
-              <label htmlFor="materia">Materia</label>
-              <input id="materia" type="text" value={materia} onChange={(e) => setMateria(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="nota">Nota</label>
-              <input id="nota" type="number" step="0.1" min="1" max="7" value={nota} onChange={(e) => setNota(e.target.value)} required />
-            </div>
-            <button type="submit" className="btn-success">Guardar Evaluación</button>
-          </form>
-        </div>
-      )}
+    <div className="manager-wrapper">
+      <div className="manager-container">
+        <header className="manager-header">
+          <h1>Gestión de Evaluaciones</h1>
+          <p>Busca estudiantes por curso, agrega calificaciones y gestiona las notas directamente desde el panel.</p>
+        </header>
 
-      <div className="form-section">
-        <h3>Buscar Estudiantes</h3>
-        <SearchForm query={query} onSetQuery={setQuery} mode={mode} onSetMode={setMode} onBuscarAcademico={handleSearch} />
-      </div>
-
-      {status === 'loading' && <p>Buscando...</p>}
-      {status === 'error' && <p className="error">{error}</p>}
-
-      <div className="table-section">
-        {status === 'success' && (
-          <>
-            <h3>Resultados de la Búsqueda</h3>
-            {estudiantes.length > 0 ? (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>RUN</th>
-                    <th>Nombre</th>
-                    <th>Curso</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {estudiantes.map((estudiante) => (
-                    <tr key={estudiante.id}>
-                      <td>{estudiante.run}</td>
-                      <td>{estudiante.nombre}</td>
-                      <td>{estudiante.curso}</td>
-                      <td className="actions">
-                        <button onClick={() => handleSelectStudent(estudiante)} className="btn-secondary">Agregar Calificación</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No se encontraron estudiantes con ese criterio.</p>
-            )}
-          </>
+        {error && (
+          <div className="manager-section" style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2', color: '#b91c1c' }}>
+            <p style={{ fontWeight: '600' }}>Error</p>
+            <p>{error}</p>
+          </div>
         )}
+
+        <section className="manager-section">
+          <h2>Buscar Estudiantes</h2>
+          <SearchForm
+            query={query}
+            onSetQuery={setQuery}
+            mode={mode}
+            onSetMode={setMode}
+            onBuscarAcademico={handleSearch}
+          />
+        </section>
+
+        {selectedStudent && (
+          <section className="form-add">
+            <h3>Agregar evaluación para <span style={{ color: '#0ea5e9' }}>{selectedStudent.nombre}</span></h3>
+            <form onSubmit={handleAddEvaluation}>
+              <input
+                value={materia}
+                onChange={(e) => setMateria(e.target.value)}
+                placeholder="Ej: Matemáticas"
+                required
+              />
+              <input
+                type="number"
+                min="1"
+                max="7"
+                step="0.1"
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                placeholder="Ej: 6.5"
+                required
+              />
+              <button type="submit" className="btn-add-eval">Guardar Evaluación</button>
+            </form>
+          </section>
+        )}
+
+        <section>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h2>Resultados de la búsqueda</h2>
+            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+              Haz click en el nombre para ver las evaluaciones y gestionar notas.
+            </p>
+          </div>
+
+          <div className="student-grid">
+            {estudiantes.map((student) => (
+              <article key={student.id} className="student-card">
+                <button
+                  onClick={() => toggleStudentDetails(student)}
+                  className="student-card-header"
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h4>{student.nombre}</h4>
+                      <p>RUN {student.run}</p>
+                    </div>
+                    <div className="toggle-icon">
+                      {expandedStudent?.id === student.id ? '▼' : '▶'}
+                    </div>
+                  </div>
+                </button>
+
+                {expandedStudent?.id === student.id && (
+                  <div className="student-details">
+                    <h5>Evaluaciones</h5>
+                    {evaluaciones.length > 0 ? (
+                      <ul className="details-list">
+                        {evaluaciones.map((evaluacion) => (
+                          <li key={evaluacion.id}>
+                            <span>{evaluacion.materia}</span>
+                            <span className={evaluacion.nota >= 4 ? 'nota-buena' : 'nota-mala'}>{evaluacion.nota}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Sin evaluaciones registradas.</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="card-actions">
+                  <button
+                    onClick={() => handleSelectStudent(student)}
+                    className="btn-add-eval"
+                  >
+                    Agregar Calificación
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

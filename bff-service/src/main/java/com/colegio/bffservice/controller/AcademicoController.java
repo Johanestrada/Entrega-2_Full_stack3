@@ -80,14 +80,21 @@ public class AcademicoController {
         return facade.guardarEvaluacionEstudiante(estudianteId, materia, nota);
     }
 
-    @PutMapping("/evaluaciones")
+    @PutMapping("/evaluaciones/{id}")
     @CrossOrigin(origins = "http://localhost:4173")
-    public Object actualizarEvaluacion(@RequestBody java.util.Map<String, Object> body) {
-        Long evaluacionId = Long.valueOf(body.get("id").toString());
+    public Object actualizarEvaluacion(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
         Double nota = Double.valueOf(body.get("nota").toString());
-        return facade.actualizarEvaluacionEstudiante(evaluacionId, nota);
+        return facade.actualizarEvaluacionEstudiante(id, nota);
     }
 
+    @DeleteMapping("/evaluaciones/{id}")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public ResponseEntity<Void> eliminarEvaluacion(@PathVariable Long id) {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("[requestId={}] DELETE /academico/evaluaciones/{} - solicitud recibida", requestId, id);
+        facade.eliminarEvaluacion(id);
+        return ResponseEntity.noContent().build();
+    }
     @PostMapping("/asistencias")
     @CrossOrigin(origins = "http://localhost:4173")
     public Object crearAsistencia(@RequestBody java.util.Map<String, Object> body) {

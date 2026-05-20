@@ -62,47 +62,47 @@ public class AcademicoFacade {
     }
 
     public AcademicoDTO obtenerDatosAcademicosPorRun(String run) {
-        try {
-            var estudiantePorRun = webClientBuilder.build()
-                .get()
-                .uri(estudianteServiceUrl + "/estudiantes/run/" + run)
-                .retrieve()
-                .bodyToMono(java.util.Map.class)
-                .block();
+        var estudiantePorRun = webClientBuilder.build()
+            .get()
+            .uri(estudianteServiceUrl + "/estudiantes/run/" + run)
+            .retrieve()
+            .onStatus(HttpStatus.NOT_FOUND::equals, response ->
+                Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante con RUN " + run + " no encontrado en estudiante-service."))
+            )
+            .onStatus(status -> status.is5xxServerError(), response ->
+                response.bodyToMono(String.class).flatMap(body -> Mono.error(new ResponseStatusException(response.statusCode(), "Error en estudiante-service: " + body)))
+            )
+            .bodyToMono(EstudianteDTO.class)
+            .block();
 
-            if (estudiantePorRun == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante no encontrado");
-            }
-
-            Long idBuscado = Long.valueOf(estudiantePorRun.get("id").toString());
-
-            var asistencias = webClientBuilder.build()
-                .get()
-                .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + idBuscado)
-                .retrieve()
-                .bodyToMono(List.class)
-                .onErrorReturn(List.of())
-                .block();
-
-            var evaluaciones = webClientBuilder.build()
-                .get()
-                .uri(evaluacionServiceUrl + "/evaluaciones/estudiante/" + idBuscado)
-                .retrieve()
-                .bodyToMono(List.class)
-                .onErrorReturn(List.of())
-                .block();
-
-            return new AcademicoDTO(estudiantePorRun, asistencias, evaluaciones);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al obtener datos académicos: " + e.getMessage(), e);
+        if (estudiantePorRun == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante no encontrado: " + run);
         }
+
+        Long idBuscado = estudiantePorRun.getId();
+        var asistencias = webClientBuilder.build()
+            .get()
+            .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + idBuscado)
+            .retrieve()
+            .bodyToMono(List.class)
+            .block();
+
+        var evaluaciones = webClientBuilder.build()
+            .get()
+            .uri(evaluacionServiceUrl + "/evaluaciones/estudiante/" + idBuscado)
+            .retrieve()
+            .bodyToMono(List.class)
+            .block();
+
+        return new AcademicoDTO(estudiantePorRun, asistencias, evaluaciones);
     }
 
     public Object marcarAsistenciaEstudiante(Long estudianteId, Boolean presente) {
         return webClientBuilder.build()
             .post()
             .uri(asistenciaServiceUrl + "/asistencias")
-            .bodyValue(java.util.Map.of("estudianteId", estudianteId, "presente", presente))
+            // Añadimos la fecha actual a la petición
+            .bodyValue(java.util.Map.of("estudianteId", estudianteId, "presente", presente, "fecha", java.time.LocalDate.now().toString()))
             .retrieve()
             .bodyToMono(Object.class)
             .block();
@@ -149,6 +149,16 @@ public class AcademicoFacade {
             .bodyValue(java.util.Map.of("nota", nota))
             .retrieve()
             .bodyToMono(Object.class)
+            .block();
+    }
+
+    public void eliminarEvaluacion(Long evaluacionId) {
+        String url = evaluacionServiceUrl + "/evaluaciones/" + evaluacionId;
+        webClientBuilder.build()
+            .delete()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(Void.class)
             .block();
     }
 

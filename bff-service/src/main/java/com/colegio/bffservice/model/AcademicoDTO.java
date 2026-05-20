@@ -1,11 +1,22 @@
 package com.colegio.bffservice.model;
 
+import com.colegio.bffservice.dto.EstudianteDTO;
+import java.util.List;
+
 public class AcademicoDTO {
     private Object estudiante;
-    private Object asistencias;
-    private Object evaluaciones;
+    private List<?> asistencias;
+    private List<?> evaluaciones;
 
-    public AcademicoDTO(Object estudiante, Object asistencias, Object evaluaciones) {
+    // Constructor para la búsqueda por ID (que devuelve un Object)
+    public AcademicoDTO(Object estudiante, List<?> asistencias, List<?> evaluaciones) {
+        this.estudiante = estudiante;
+        this.asistencias = asistencias;
+        this.evaluaciones = evaluaciones;
+    }
+
+    // Constructor para la búsqueda por RUN (que devuelve un EstudianteDTO)
+    public AcademicoDTO(EstudianteDTO estudiante, List<?> asistencias, List<?> evaluaciones) {
         this.estudiante = estudiante;
         this.asistencias = asistencias;
         this.evaluaciones = evaluaciones;
@@ -19,19 +30,19 @@ public class AcademicoDTO {
         this.estudiante = estudiante;
     }
 
-    public Object getAsistencias() {
+    public List<?> getAsistencias() {
         return asistencias;
     }
 
-    public void setAsistencias(Object asistencias) {
+    public void setAsistencias(List<?> asistencias) {
         this.asistencias = asistencias;
     }
 
-    public Object getEvaluaciones() {
+    public List<?> getEvaluaciones() {
         return evaluaciones;
     }
 
-    public void setEvaluaciones(Object evaluaciones) {
+    public void setEvaluaciones(List<?> evaluaciones) {
         this.evaluaciones = evaluaciones;
     }
 }

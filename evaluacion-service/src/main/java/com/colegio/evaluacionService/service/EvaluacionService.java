@@ -35,15 +35,12 @@ public class EvaluacionService {
         return repository.findById(id).orElse(null);
     }
 
-    public Evaluacion actualizar(Long id, Evaluacion evaluacion) {
+    public Evaluacion actualizar(Long id, Double nota) {
         return repository.findById(id)
                 .map(actual -> {
-                    actual.setEstudianteId(evaluacion.getEstudianteId());
-                    actual.setMateria(evaluacion.getMateria());
-                    actual.setNota(evaluacion.getNota());
+                    actual.setNota(nota);
                     return repository.save(actual);
-                })
-                .orElse(null);
+                }).orElse(null);
     }
 
     public void eliminar(Long id) {

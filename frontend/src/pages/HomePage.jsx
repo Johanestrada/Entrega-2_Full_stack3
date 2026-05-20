@@ -5,31 +5,30 @@ export default function HomePage() {
     <section className="home-page">
       <div className="home-hero">
         <div className="hero-copy">
-          <span className="eyebrow">Bienvenido al Colegio</span>
+          <span className="eyebrow">Bienvenido</span>
           <h1>Portal Académico</h1>
           <p>
             Consulta asistencias, evaluaciones y datos de estudiantes desde una sola plataforma.
           </p>
           <div className="hero-actions">
             <Link className="button" to="/login">Iniciar sesión</Link>
-            <Link className="button button-secondary" to="/register">Registrarse</Link>
           </div>
         </div>
         <div className="hero-cards">
           <article className="hero-card">
-            <div className="hero-card-icon">🏫</div>
-            <h2>Infraestructura</h2>
-            <p>Imágenes y noticias del colegio para toda la comunidad.</p>
+            <div className="hero-card-icon">👤</div>
+            <h2>Estudiantes</h2>
+            <p>Gestiona la información completa de cada alumno.</p>
           </article>
           <article className="hero-card">
-            <div className="hero-card-icon">📚</div>
-            <h2>Educación</h2>
-            <p>Herramientas para ver resultados y progreso académico.</p>
+            <div className="hero-card-icon">📝</div>
+            <h2>Evaluaciones</h2>
+            <p>Registra y consulta las calificaciones de forma sencilla.</p>
           </article>
           <article className="hero-card">
-            <div className="hero-card-icon">👩‍🏫</div>
-            <h2>Profesores</h2>
-            <p>Accede a la información de cada alumno con un solo clic.</p>
+            <div className="hero-card-icon">📅</div>
+            <h2>Asistencias</h2>
+            <p>Lleva un control diario de la asistencia de los cursos.</p>
           </article>
         </div>
       </div>

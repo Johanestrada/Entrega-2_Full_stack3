@@ -4,7 +4,7 @@ COPY mvnw pom.xml .
 COPY .mvn .mvn
 COPY src src
 RUN chmod +x ./mvnw
-RUN ./mvnw -B clean package -DskipTests
+RUN ./mvnw -B clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app

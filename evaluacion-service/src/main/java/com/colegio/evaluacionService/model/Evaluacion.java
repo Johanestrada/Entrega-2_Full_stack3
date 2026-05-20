@@ -19,9 +19,8 @@ public class Evaluacion {
     public Evaluacion() {
     }
 
-    public Evaluacion(Long id, String nombre, String materia, Double nota) {
-        this.id = id;
-        this.estudianteId = nombre != null ? Long.valueOf(nombre) : null;
+    public Evaluacion(Long estudianteId, String materia, Double nota) {
+        this.estudianteId = estudianteId;
         this.materia = materia;
         this.nota = nota;
     }

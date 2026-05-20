@@ -1,34 +1,37 @@
 import { useState } from 'react';
-import { useAcademicData } from '../hooks/useAcademicData';
-import SearchForm from '../components/SearchForm';
-import AcademicCards from '../components/AcademicCards';
+import EstudianteManager from '../components/EstudianteManager';
+import EvaluacionManager from '../components/EvaluacionManager';
+import AsistenciaManager from '../components/AsistenciaManager';
+import '../components/Dashboard.css';
 
-export default function DashboardPage() {
-  const [query, setQuery] = useState('');
-  const [mode, setMode] = useState('run');
-  const { data, error, loading, buscarAcademico } = useAcademicData();
+export default function DashboardPage({ handleLogout }) {
+  const [activeTab, setActiveTab] = useState('estudiantes');
 
-  const handleBuscarAcademico = async (event) => {
-    event.preventDefault();
-    await buscarAcademico(query, mode);
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'estudiantes':
+        return <EstudianteManager />;
+      case 'evaluaciones':
+        return <EvaluacionManager />;
+      case 'asistencias':
+        return <AsistenciaManager />;
+      default:
+        return <EstudianteManager />;
+    }
   };
 
   return (
-    <section className="dashboard-page">
-      <div className="dashboard-panel">
-        <h1>Panel Académico</h1>
-        <p>Busca los datos combinados desde el BFF.</p>
-        <SearchForm
-          query={query}
-          onSetQuery={setQuery}
-          mode={mode}
-          onSetMode={setMode}
-          onBuscarAcademico={handleBuscarAcademico}
-        />
-        {loading && <p className="info">Cargando...</p>}
-        {error && <p className="error">{error}</p>}
-        {data && <AcademicCards data={data} />}
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <div className="dashboard-nav">
+          <button onClick={() => setActiveTab('estudiantes')} className={activeTab === 'estudiantes' ? 'active' : ''}>Estudiantes</button>
+          <button onClick={() => setActiveTab('evaluaciones')} className={activeTab === 'evaluaciones' ? 'active' : ''}>Evaluaciones</button>
+          <button onClick={() => setActiveTab('asistencias')} className={activeTab === 'asistencias' ? 'active' : ''}>Asistencias</button>
+        </div>
+        <button onClick={handleLogout} className="logout-button">Cerrar Sesión</button>
       </div>
-    </section>
+
+      <div className="dashboard-content">{renderContent()}</div>
+    </div>
   );
 }

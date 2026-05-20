@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.colegio.bffservice.model.AcademicoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -68,5 +69,47 @@ public class AcademicoController {
         String materia = String.valueOf(body.getOrDefault("materia", ""));
         Double nota = Double.valueOf(String.valueOf(body.getOrDefault("nota", "0")));
         return facade.guardarEvaluacionEstudiante(id, materia, nota);
+    }
+
+    @PostMapping("/evaluaciones")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public Object crearEvaluacion(@RequestBody java.util.Map<String, Object> body) {
+        Long estudianteId = Long.valueOf(body.get("estudianteId").toString());
+        String materia = body.get("materia").toString();
+        Double nota = Double.valueOf(body.get("nota").toString());
+        return facade.guardarEvaluacionEstudiante(estudianteId, materia, nota);
+    }
+
+    @PutMapping("/evaluaciones")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public Object actualizarEvaluacion(@RequestBody java.util.Map<String, Object> body) {
+        Long evaluacionId = Long.valueOf(body.get("id").toString());
+        Double nota = Double.valueOf(body.get("nota").toString());
+        return facade.actualizarEvaluacionEstudiante(evaluacionId, nota);
+    }
+
+    @PostMapping("/asistencias")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public Object crearAsistencia(@RequestBody java.util.Map<String, Object> body) {
+        Long estudianteId = Long.valueOf(body.get("estudianteId").toString());
+        Boolean presente = Boolean.valueOf(body.get("presente").toString());
+        return facade.marcarAsistenciaEstudiante(estudianteId, presente);
+    }
+
+    @PostMapping("/estudiantes")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public Object crearEstudiante(@RequestBody Object estudiante) {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("[requestId={}] POST /academico/estudiantes - solicitud recibida desde frontend", requestId);
+        return facade.crearEstudiante(estudiante);
+    }
+
+    @DeleteMapping("/estudiantes/{id}")
+    @CrossOrigin(origins = "http://localhost:4173")
+    public ResponseEntity<Void> eliminarEstudiante(@PathVariable Long id) {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("[requestId={}] DELETE /academico/estudiantes/{} - solicitud recibida", requestId, id);
+        facade.eliminarEstudiante(id);
+        return ResponseEntity.noContent().build();
     }
 }

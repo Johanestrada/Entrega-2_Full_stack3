@@ -1,6 +1,7 @@
 package com.colegio.evaluacionService.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,10 +55,11 @@ public class EvaluacionController {
 
     @PutMapping("/{id}")
     public Evaluacion actualizar(
-            @PathVariable Long id,
-            @RequestBody Evaluacion evaluacion
+        @PathVariable Long id,
+        @RequestBody Map<String, Object> body
     ) {
-        return service.actualizar(id, evaluacion);
+        Double nota = Double.valueOf(body.get("nota").toString());
+        return service.actualizar(id, nota);
     }
 
     @DeleteMapping("/{id}")

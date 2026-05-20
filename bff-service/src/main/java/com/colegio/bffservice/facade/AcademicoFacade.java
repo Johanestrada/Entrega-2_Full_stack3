@@ -1,12 +1,14 @@
 package com.colegio.bffservice.facade;
 
 import com.colegio.bffservice.model.AcademicoDTO;
+import com.colegio.bffservice.dto.EstudianteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
@@ -51,7 +53,7 @@ public class AcademicoFacade {
 
         var evaluaciones = webClientBuilder.build()
             .get()
-            .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + idBuscado)
+            .uri(evaluacionServiceUrl + "/evaluaciones/estudiante/" + idBuscado)
             .retrieve()
             .bodyToMono(List.class)
             .block();
@@ -60,65 +62,50 @@ public class AcademicoFacade {
     }
 
     public AcademicoDTO obtenerDatosAcademicosPorRun(String run) {
-        var estudiantePorRun = webClientBuilder.build()
-            .get()
-            .uri(estudianteServiceUrl + "/estudiantes/run/" + run)
-            .retrieve()
-            .bodyToMono(java.util.Map.class)
-            .block();
-
-        if (!(estudiantePorRun instanceof java.util.Map<?, ?> estudianteMap)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante no encontrado: " + run);
-        }
-
-        Object idValue = estudianteMap.get("id");
-        if (idValue == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante no encontrado: " + run);
-        }
-
-        Long idBuscado = Long.valueOf(idValue.toString());
-
-        var estudiante = webClientBuilder.build()
+        try {
+            var estudiantePorRun = webClientBuilder.build()
                 .get()
-                .uri(estudianteServiceUrl + "/estudiantes/" + idBuscado)
+                .uri(estudianteServiceUrl + "/estudiantes/run/" + run)
                 .retrieve()
-                .bodyToMono(Object.class)
+                .bodyToMono(java.util.Map.class)
                 .block();
 
-        var asistencias = webClientBuilder.build()
-            .get()
-            .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + idBuscado)
-            .retrieve()
-            .bodyToMono(List.class)
-            .block();
+            if (estudiantePorRun == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante no encontrado");
+            }
 
-        var evaluaciones = webClientBuilder.build()
-            .get()
-            .uri(evaluacionServiceUrl + "/evaluaciones?nombre=" + idBuscado)
-            .retrieve()
-            .bodyToMono(List.class)
-            .block();
+            Long idBuscado = Long.valueOf(estudiantePorRun.get("id").toString());
 
-        return new AcademicoDTO(estudiante, asistencias, evaluaciones);
+            var asistencias = webClientBuilder.build()
+                .get()
+                .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + idBuscado)
+                .retrieve()
+                .bodyToMono(List.class)
+                .onErrorReturn(List.of())
+                .block();
+
+            var evaluaciones = webClientBuilder.build()
+                .get()
+                .uri(evaluacionServiceUrl + "/evaluaciones/estudiante/" + idBuscado)
+                .retrieve()
+                .bodyToMono(List.class)
+                .onErrorReturn(List.of())
+                .block();
+
+            return new AcademicoDTO(estudiantePorRun, asistencias, evaluaciones);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al obtener datos académicos: " + e.getMessage(), e);
+        }
     }
 
     public Object marcarAsistenciaEstudiante(Long estudianteId, Boolean presente) {
-        String fecha = java.time.LocalDate.now().toString();
-        var asistenciaBody = java.util.Map.of(
-            "estudianteId", estudianteId,
-            "fecha", fecha,
-            "presente", presente
-        );
-
-        var created = webClientBuilder.build()
+        return webClientBuilder.build()
             .post()
             .uri(asistenciaServiceUrl + "/asistencias")
-            .bodyValue(asistenciaBody)
+            .bodyValue(java.util.Map.of("estudianteId", estudianteId, "presente", presente))
             .retrieve()
             .bodyToMono(Object.class)
             .block();
-
-        return created;
     }
 
     public List<Object> marcarAsistenciaCurso(String curso, Boolean presente) {
@@ -146,16 +133,20 @@ public class AcademicoFacade {
     }
 
     public Object guardarEvaluacionEstudiante(Long estudianteId, String materia, Double nota) {
-        var evaluacionBody = java.util.Map.of(
-            "estudianteId", estudianteId,
-            "materia", materia,
-            "nota", nota
-        );
-
         return webClientBuilder.build()
             .post()
             .uri(evaluacionServiceUrl + "/evaluaciones")
-            .bodyValue(evaluacionBody)
+            .bodyValue(java.util.Map.of("estudianteId", estudianteId, "materia", materia, "nota", nota))
+            .retrieve()
+            .bodyToMono(Object.class)
+            .block();
+    }
+
+    public Object actualizarEvaluacionEstudiante(Long evaluacionId, Double nota) {
+        return webClientBuilder.build()
+            .put()
+            .uri(evaluacionServiceUrl + "/evaluaciones/" + evaluacionId)
+            .bodyValue(java.util.Map.of("nota", nota))
             .retrieve()
             .bodyToMono(Object.class)
             .block();
@@ -179,16 +170,38 @@ public class AcademicoFacade {
                 .get()
                 .uri(estudianteServiceUrl + "/estudiantes/run/" + estudianteId)
                 .retrieve()
-                .bodyToMono(java.util.Map.class)
+                .onStatus(HttpStatus.NOT_FOUND::equals, response ->
+                    Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudiante con RUN " + estudianteId + " no encontrado."))
+                )
+                .bodyToMono(EstudianteDTO.class)
                 .block();
 
-        if (estudiante instanceof java.util.Map<?, ?> estudianteMap) {
-            Object idValue = estudianteMap.get("id");
-            if (idValue != null) {
-                return Long.valueOf(idValue.toString());
-            }
+        if (estudiante != null && estudiante.getId() != null) {
+            return estudiante.getId();
         }
 
         throw new IllegalArgumentException("Estudiante no encontrado: " + estudianteId);
+    }
+
+    public Object crearEstudiante(Object estudiante) {
+        // La URL para crear es http://estudiante-service:8081/estudiantes
+        String url = estudianteServiceUrl + "/estudiantes";
+        return webClientBuilder.build()
+            .post()
+            .uri(url)
+            .bodyValue(estudiante)
+            .retrieve()
+            .bodyToMono(Object.class)
+            .block();
+    }
+
+    public void eliminarEstudiante(Long id) {
+        String url = estudianteServiceUrl + "/estudiantes/" + id;
+        webClientBuilder.build()
+            .delete()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(Void.class)
+            .block();
     }
 }

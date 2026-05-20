@@ -7,7 +7,7 @@ services:
   estudiante-service:
     build: ./estudiante-service
     ports:
-      - '8181:8081'
+      - '8081:8081'
     depends_on:
       - eureka-server
     environment:
@@ -16,7 +16,7 @@ services:
   asistencia-service:
     build: ./asistencia-service
     ports:
-      - '8182:8082'
+      - '8082:8082'
     depends_on:
       - eureka-server
     environment:
@@ -25,7 +25,7 @@ services:
   evaluacion-service:
     build: ./evaluacion-service
     ports:
-      - '8183:8083'
+      - '8083:8083'
     depends_on:
       - eureka-server
     environment:
@@ -34,13 +34,14 @@ services:
   bff-service:
     build: ./bff-service
     ports:
-      - '8184:8084'
+      - '8084:8084'
     depends_on:
       - eureka-server
       - estudiante-service
       - asistencia-service
       - evaluacion-service
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - ESTUDIANTE_SERVICE_URL=http://estudiante-service:8081
       - ASISTENCIA_SERVICE_URL=http://asistencia-service:8082
@@ -50,8 +51,12 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_BFF_URL: http://localhost:8184
+        VITE_BFF_URL: http://localhost:8084 # Esta URL es para el navegador del usuario
     ports:
       - '4173:4173'
     depends_on:
       - bff-service
+
+networks:
+  default:
+    driver: bridge

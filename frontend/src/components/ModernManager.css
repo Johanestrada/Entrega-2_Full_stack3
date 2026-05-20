@@ -135,6 +135,66 @@
 .details-list .asistencia-presente { color: #16a34a; font-weight: 600; }
 .details-list .asistencia-ausente { color: #dc2626; font-weight: 600; }
 
+.details-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-edit, .btn-delete, .btn-save, .btn-cancel {
+  background: none;
+  border: 1px solid transparent;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  color: #ca8a04; /* Amber 600 */
+  border-color: #f59e0b; /* Amber 500 */
+}
+.btn-edit:hover {
+  background-color: #fefce8; /* Amber 50 */
+}
+
+.btn-delete {
+  color: #dc2626; /* Red 600 */
+  border-color: #ef4444; /* Red 500 */
+}
+.btn-delete:hover {
+  background-color: #fee2e2; /* Red 100 */
+}
+
+.btn-save {
+  background-color: #16a34a; /* Green 600 */
+  color: white;
+}
+.btn-save:hover {
+  background-color: #15803d; /* Green 700 */
+}
+
+.btn-cancel {
+  background-color: #64748b; /* Slate 500 */
+  color: white;
+}
+.btn-cancel:hover {
+  background-color: #475569; /* Slate 600 */
+}
+
+.edit-form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.edit-input {
+  flex-grow: 1;
+  padding: 0.5rem;
+}
+
 /* --- Botones de Acción en Tarjeta --- */
 .card-actions {
   border-top: 1px solid #e2e8f0;

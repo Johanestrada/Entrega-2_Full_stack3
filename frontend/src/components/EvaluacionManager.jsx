@@ -16,7 +16,8 @@ export default function EvaluacionManager() {
   const [materia, setMateria] = useState('');
   const [nota, setNota] = useState('');
   const [editingId, setEditingId] = useState(null);
-  const [editNota, setEditNota] = useState('');
+  const [editMateria, setEditMateria] = useState('');
+  const [editNota, setEditNota] = useState(0);
 
   useEffect(() => {
     setReactMontado(true);
@@ -78,7 +79,7 @@ export default function EvaluacionManager() {
   };
 
   const handleEditEvaluacion = async (evaluacionId) => {
-    if (!editNota || editNota < 1 || editNota > 7) {
+    if (!editNota || parseFloat(editNota) < 1 || parseFloat(editNota) > 7) {
       setError('La nota debe estar entre 1 y 7.');
       return;
     }
@@ -87,16 +88,17 @@ export default function EvaluacionManager() {
       const response = await fetch(`http://localhost:8084/academico/evaluaciones/${evaluacionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: evaluacionId, nota: parseFloat(editNota) }),
+        body: JSON.stringify({ nota: parseFloat(editNota) }),
       });
 
       if (!response.ok) throw new Error('Error al actualizar evaluación');
 
       setEvaluaciones(evaluaciones.map(e => 
-        e.id === evaluacionId ? { ...e, nota: parseFloat(editNota) } : e
+        e.id === evaluacionId ? { ...e, nota: parseFloat(editNota), materia: editMateria } : e
       ));
       setEditingId(null);
       setEditNota('');
+      setEditMateria('');
       setError(null);
     } catch (err) {
       setError(err.message || 'No se pudo actualizar la evaluación.');
@@ -118,6 +120,19 @@ export default function EvaluacionManager() {
     } catch (err) {
       setError(err.message || 'No se pudo eliminar la evaluación.');
     }
+  };
+
+  const startEditing = (evaluacion) => {
+    setEditingId(evaluacion.id);
+    setEditMateria(evaluacion.materia);
+    setEditNota(evaluacion.nota);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditMateria('');
+    setEditNota(0);
+    setError(null);
   };
 
   const toggleStudentDetails = async (student) => {
@@ -236,8 +251,37 @@ export default function EvaluacionManager() {
                       <ul className="details-list">
                         {evaluaciones.map((evaluacion) => (
                           <li key={evaluacion.id}>
-                            <span>{evaluacion.materia}</span>
-                            <span className={evaluacion.nota >= 4 ? 'nota-buena' : 'nota-mala'}>{evaluacion.nota}</span>
+                            {editingId === evaluacion.id ? (
+                              <div className="edit-form">
+                                <input
+                                  type="text"
+                                  value={editMateria}
+                                  onChange={(e) => setEditMateria(e.target.value)}
+                                  className="edit-input"
+                                  disabled 
+                                />
+                                <input
+                                  type="number"
+                                  value={editNota}
+                                  onChange={(e) => setEditNota(e.target.value)}
+                                  className="edit-input"
+                                  step="0.1"
+                                />
+                                <div className="edit-actions">
+                                  <button onClick={() => handleEditEvaluacion(evaluacion.id)} className="btn-save">Guardar</button>
+                                  <button onClick={cancelEditing} className="btn-cancel">Cancelar</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <span>{evaluacion.materia}</span>
+                                <div className="details-actions">
+                                  <span className={evaluacion.nota >= 4 ? 'nota-buena' : 'nota-mala'}>{evaluacion.nota}</span>
+                                  <button onClick={() => startEditing(evaluacion)} className="btn-edit">Editar</button>
+                                  <button onClick={() => handleDeleteEvaluacion(evaluacion.id)} className="btn-delete">Eliminar</button>
+                                </div>
+                              </>
+                            )}
                           </li>
                         ))}
                       </ul>

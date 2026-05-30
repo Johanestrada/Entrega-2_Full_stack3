@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { registerUser } from '../services/authApi';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  // Eliminado campo email
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,17 +16,16 @@ export default function RegisterPage() {
     setMessage('');
     setLoading(true);
 
-    if (!username || !email || !password) {
+    if (!username || !password) {
       setError('Completa todos los campos para registrarte.');
       setLoading(false);
       return;
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await registerUser(username, password);
       setMessage('Registro exitoso. Ahora puedes iniciar sesión.');
       setUsername('');
-      setEmail('');
       setPassword('');
     } catch (err) {
       setError(err.message || 'Error al registrar la cuenta.');
@@ -61,10 +61,6 @@ export default function RegisterPage() {
                     <div>
                       <label className="form-label">Usuario</label>
                       <input className="form-control form-control-lg" value={username} onChange={(e) => setUsername(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="form-label">Correo electrónico</label>
-                      <input className="form-control form-control-lg" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div>
                       <label className="form-label">Contraseña</label>

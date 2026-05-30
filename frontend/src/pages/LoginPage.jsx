@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../services/authApi';
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -12,9 +13,13 @@ export default function LoginPage({ onLogin }) {
     setError('');
 
     if (username && password) {
-      const fakeToken = 'fake-jwt-token';
-      onLogin({ username, token: fakeToken });
-      navigate('/dashboard');
+      try {
+        const result = await loginUser(username, password);
+        onLogin({ username, token: result.token });
+        navigate('/dashboard');
+      } catch (err) {
+        setError(err.message || 'Error al iniciar sesión.');
+      }
     } else {
       setError('Por favor, ingresa tu usuario y contraseña.');
     }
@@ -70,6 +75,10 @@ export default function LoginPage({ onLogin }) {
                     <button type="submit" className="btn btn-primary btn-lg w-100">
                       Entrar
                     </button>
+                    <div className="text-center mt-2">
+                      <span>¿No tienes cuenta? </span>
+                      <a href="/register">Regístrate aquí</a>
+                    </div>
                   </form>
                 </div>
               </div>

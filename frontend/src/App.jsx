@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import HomePage from './pages/HomePage';
 
@@ -49,6 +50,9 @@ function App() {
               <Link className="nav-link" to="/dashboard">
                 Dashboard
               </Link>
+              <Link className="nav-link" to="/register">
+                Crear cuenta
+              </Link>
             </div>
           </div>
         </header>
@@ -57,6 +61,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="/dashboard"
               element={user ? <DashboardPage handleLogout={handleLogout} /> : <Navigate to="/login" replace />}

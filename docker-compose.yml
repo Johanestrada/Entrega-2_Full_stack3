@@ -1,4 +1,19 @@
 services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: colegio
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - default
   eureka-server:
     build: ./eureka-server
     ports:
@@ -10,8 +25,14 @@ services:
       - '8081:8081'
     depends_on:
       - eureka-server
+      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
 
   asistencia-service:
     build: ./asistencia-service
@@ -19,8 +40,14 @@ services:
       - '8082:8082'
     depends_on:
       - eureka-server
+      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
 
   evaluacion-service:
     build: ./evaluacion-service
@@ -28,8 +55,14 @@ services:
       - '8083:8083'
     depends_on:
       - eureka-server
+      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
 
   bff-service:
     build: ./bff-service
@@ -40,12 +73,18 @@ services:
       - estudiante-service
       - asistencia-service
       - evaluacion-service
+      - mysql
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - ESTUDIANTE_SERVICE_URL=http://estudiante-service:8081
       - ASISTENCIA_SERVICE_URL=http://asistencia-service:8082
       - EVALUACION_SERVICE_URL=http://evaluacion-service:8083
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
 
   frontend:
     build:
@@ -56,6 +95,9 @@ services:
       - '4173:4173'
     depends_on:
       - bff-service
+
+volumes:
+  mysql_data:
 
 networks:
   default:

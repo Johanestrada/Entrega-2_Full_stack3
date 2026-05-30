@@ -1,7 +1,22 @@
 const BFF_URL = import.meta.env.VITE_BFF_URL || 'http://localhost:8184';
 
+function getToken() {
+  const user = localStorage.getItem('user');
+  if (!user) return null;
+  try {
+    return JSON.parse(user).token;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchApi(path, options = {}) {
-  const response = await fetch(`${BFF_URL}${path}`, options);
+  const token = getToken();
+  const headers = { ...(options.headers || {}) };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${BFF_URL}${path}`, { ...options, headers });
   if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorBody}`);

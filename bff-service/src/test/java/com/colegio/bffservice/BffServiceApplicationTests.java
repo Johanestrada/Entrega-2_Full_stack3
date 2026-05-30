@@ -1,58 +1,106 @@
 package com.colegio.bffservice;
 
-import com.colegio.bffservice.dto.EstudianteDTO;
-import com.colegio.bffservice.service.AcademicoService;
 import com.colegio.bffservice.controller.AcademicoController;
+import com.colegio.bffservice.dto.EstudianteDTO;
+import com.colegio.bffservice.facade.AcademicoFacade;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest // Carga el contexto completo de la aplicación para las pruebas
-@AutoConfigureMockMvc // Configura automáticamente MockMvc para pruebas de integración
+@WebMvcTest(AcademicoController.class)
 class BffServiceApplicationTests {
 
 	@Autowired
-	private MockMvc mockMvc; // Objeto para simular peticiones HTTP
+	private MockMvc mockMvc;
 
 	@MockBean
-	private AcademicoService academicoService; // Mock del servicio para no depender de los microservicios reales
+	private AcademicoFacade academicoFacade;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Test
 	void contextLoads() {
-		// Esta prueba básica sigue siendo útil para asegurar que el contexto del test se carga correctamente.
 	}
 
 	@Test
 	void alBuscarPorCurso_debeRetornarListaDeEstudiantes() throws Exception {
-		// 1. Preparación (Arrange)
 		String curso = "1-A";
-		EstudianteDTO estudiante1 = new EstudianteDTO(1L, "20.111.222-3", "Juan Perez", curso);
-		EstudianteDTO estudiante2 = new EstudianteDTO(2L, "21.222.333-4", "Ana Gomez", curso);
-		List<EstudianteDTO> estudiantes = Arrays.asList(estudiante1, estudiante2);
 
-		// Simulamos la respuesta del servicio
-		when(academicoService.getEstudiantesPorCurso(curso)).thenReturn(estudiantes);
+		EstudianteDTO estudiante1 = new EstudianteDTO();
+		estudiante1.setId(1L);
+		estudiante1.setRun("20.111.222-3");
+		estudiante1.setNombre("Juan Perez");
+		estudiante1.setCurso(curso);
 
-		// 2. Actuación (Act) y 3. Aserción (Assert)
+		EstudianteDTO estudiante2 = new EstudianteDTO();
+		estudiante2.setId(2L);
+		estudiante2.setRun("21.222.333-4");
+		estudiante2.setNombre("Ana Gomez");
+		estudiante2.setCurso(curso);
+
+		List<Object> estudiantes = Arrays.<Object>asList(estudiante1, estudiante2);
+
+		when(academicoFacade.obtenerEstudiantesPorCurso(curso)).thenReturn(estudiantes);
+
 		mockMvc.perform(get("/academico/curso/{curso}", curso).contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()) // Esperamos un código 200 OK
-				.andExpect(jsonPath("$", hasSize(2))) // Esperamos que la lista JSON tenga 2 elementos
-				.andExpect(jsonPath("$[0].nombre", is("Juan Perez"))) // Verificamos el nombre del primer estudiante
-				.andExpect(jsonPath("$[1].nombre", is("Ana Gomez"))); // Verificamos el nombre del segundo
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", Matchers.hasSize(2)))
+				.andExpect(jsonPath("$[0].nombre", Matchers.is("Juan Perez")))
+				.andExpect(jsonPath("$[1].nombre", Matchers.is("Ana Gomez")));
 	}
 
+	@Test
+	void alCrearAsistencia_debeRetornarObjetoCreado() throws Exception {
+		Map<String, Object> response = Map.of("status", "creado");
+
+		when(academicoFacade.marcarAsistenciaEstudiante(any(Long.class), any(Boolean.class)))
+				.thenReturn(response);
+
+		mockMvc.perform(post("/academico/asistencias")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(Map.of(
+								"estudianteId", 1L,
+								"presente", true))))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status", Matchers.is("creado")));
+
+		verify(academicoFacade, times(1)).marcarAsistenciaEstudiante(1L, true);
+	}
+
+	@Test
+	void alCrearEvaluacion_debeRetornarObjetoCreado() throws Exception {
+		Map<String, Object> response = Map.of("id", 100);
+
+		when(academicoFacade.guardarEvaluacionEstudiante(any(Long.class), any(String.class), any(Double.class)))
+				.thenReturn(response);
+
+		mockMvc.perform(post("/academico/evaluaciones")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(Map.of(
+								"estudianteId", 1L,
+								"materia", "Matemáticas",
+								"nota", 6.5))))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", Matchers.is(100)));
+
+		verify(academicoFacade, times(1)).guardarEvaluacionEstudiante(1L, "Matemáticas", 6.5);
+	}
 }

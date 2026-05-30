@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';import HomePage from './pages/HomePage';
+import DashboardPage from './pages/DashboardPage';
+import HomePage from './pages/HomePage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -32,10 +33,24 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app-container">
-        
-        <header className="site-header">
-          <h1>Portal Académico</h1>
+      <div className="app-shell">
+        <header className="navbar navbar-dark glass-nav sticky-top">
+          <div className="container-fluid px-4 py-2">
+            <Link className="navbar-brand fw-semibold brand-mark" to="/">
+              Portal Académico
+            </Link>
+            <div className="navbar-nav ms-auto flex-row align-items-center gap-2">
+              <Link className="nav-link" to="/">
+                Inicio
+              </Link>
+              <Link className="nav-link" to="/login">
+                Login
+              </Link>
+              <Link className="nav-link" to="/dashboard">
+                Dashboard
+              </Link>
+            </div>
+          </div>
         </header>
 
         <main className="main-content">
@@ -50,7 +65,10 @@ function App() {
         </main>
 
         <footer className="site-footer">
-          <p>&copy; 2026 Portal Académico. Todos los derechos reservados.</p>
+          <div className="container-fluid px-4 py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <span>&copy; 2026 Portal Académico.</span>
+            <span className="footer-note">Bootstrap + estilo limpio inspirado en paneles 3D.</span>
+          </div>
         </footer>
       </div>
     </BrowserRouter>

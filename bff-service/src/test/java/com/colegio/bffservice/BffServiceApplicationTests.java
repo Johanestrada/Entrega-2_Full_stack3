@@ -19,6 +19,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -60,7 +62,9 @@ class BffServiceApplicationTests {
 
 		when(academicoFacade.obtenerEstudiantesPorCurso(curso)).thenReturn(estudiantes);
 
-		mockMvc.perform(get("/academico/curso/{curso}", curso).contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/academico/curso/{curso}", curso)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(httpBasic("user", "password")))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$", Matchers.hasSize(2)))
 				.andExpect(jsonPath("$[0].nombre", Matchers.is("Juan Perez")))
@@ -78,7 +82,9 @@ class BffServiceApplicationTests {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(Map.of(
 								"estudianteId", 1L,
-								"presente", true))))
+								"presente", true)))
+						.with(httpBasic("user", "password"))
+						.with(csrf()))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status", Matchers.is("creado")));
 
@@ -97,7 +103,9 @@ class BffServiceApplicationTests {
 						.content(objectMapper.writeValueAsString(Map.of(
 								"estudianteId", 1L,
 								"materia", "Matemáticas",
-								"nota", 6.5))))
+								"nota", 6.5)))
+						.with(httpBasic("user", "password"))
+						.with(csrf()))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id", Matchers.is(100)));
 

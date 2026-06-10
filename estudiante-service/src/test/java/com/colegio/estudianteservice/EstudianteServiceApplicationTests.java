@@ -112,6 +112,23 @@ class EstudianteServiceApplicationTests {
 	}
 
 	@Test
+	void obtenerPorRun_inexistente_debeRetornarNotFound() throws Exception {
+		when(estudianteRepository.findByRun("99.999.999-9")).thenReturn(null);
+
+		mockMvc.perform(get("/estudiantes/run/{run}", "99.999.999-9").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void obtenerPorCurso_sinEstudiantes_debeRetornarListaVacia() throws Exception {
+		when(estudianteRepository.findByCurso("3-Z")).thenReturn(Collections.emptyList());
+
+		mockMvc.perform(get("/estudiantes/curso/{curso}", "3-Z").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(0)));
+	}
+
+	@Test
 	void guardar_debeRetornarEstudianteCreado() throws Exception {
 		Estudiante request = new Estudiante(null, "20.111.222-3", "Juan Perez", "1-A");
 		Estudiante response = new Estudiante(1L, "20.111.222-3", "Juan Perez", "1-A");
@@ -129,10 +146,47 @@ class EstudianteServiceApplicationTests {
 	}
 
 	@Test
+	void guardar_conNombre_debeGuardar() throws Exception {
+		Estudiante response = new Estudiante(2L, "21.222.333-4", "Ana", "2-A");
+
+		when(estudianteRepository.save(any(Estudiante.class))).thenReturn(response);
+
+		mockMvc.perform(post("/estudiantes")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"run\": \"21.222.333-4\", \"nombre\": \"Ana\", \"curso\": \"2-A\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.nombre", is("Ana")));
+	}
+
+	@Test
 	void eliminar_debeRetornarNoContent() throws Exception {
 		mockMvc.perform(delete("/estudiantes/{id}", 1L))
 				.andExpect(status().isNoContent());
 
 		verify(estudianteRepository, times(1)).deleteById(1L);
+	}
+
+	@Test
+	void eliminar_porRunInexistente_debeRetornarNoContent() throws Exception {
+		mockMvc.perform(delete("/estudiantes/{id}", 999L))
+				.andExpect(status().isNoContent());
+
+		verify(estudianteRepository, times(1)).deleteById(999L);
+	}
+
+	@Test
+	void obtenerPorCurso_conMultiplesEstudiantes_debeRetornarTodos() throws Exception {
+		Estudiante est1 = new Estudiante(1L, "20.111.222-3", "Juan", "1-A");
+		Estudiante est2 = new Estudiante(2L, "21.222.333-4", "Ana", "1-A");
+		Estudiante est3 = new Estudiante(3L, "22.333.444-5", "Pedro", "1-A");
+
+		when(estudianteRepository.findByCurso("1-A")).thenReturn(Arrays.asList(est1, est2, est3));
+
+		mockMvc.perform(get("/estudiantes/curso/{curso}", "1-A").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(3)))
+				.andExpect(jsonPath("$[0].nombre", is("Juan")))
+				.andExpect(jsonPath("$[1].nombre", is("Ana")))
+				.andExpect(jsonPath("$[2].nombre", is("Pedro")));
 	}
 }

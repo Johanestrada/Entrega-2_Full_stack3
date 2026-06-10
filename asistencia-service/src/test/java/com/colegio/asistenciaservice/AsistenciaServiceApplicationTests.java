@@ -162,10 +162,62 @@ class AsistenciaServiceApplicationTests {
 	}
 
 	@Test
-	void eliminar_debeRetornarNoContent() throws Exception {
+	void listarPorEstudiante_conMultiplesAsistencias_debeRetornarTodas() throws Exception {
+		Asistencia a1 = new Asistencia();
+		a1.setId(1L);
+		a1.setEstudianteId(10L);
+		a1.setFecha("2026-05-30");
+		a1.setPresente(true);
+
+		Asistencia a2 = new Asistencia();
+		a2.setId(2L);
+		a2.setEstudianteId(10L);
+		a2.setFecha("2026-05-29");
+		a2.setPresente(true);
+
+		Asistencia a3 = new Asistencia();
+		a3.setId(3L);
+		a3.setEstudianteId(10L);
+		a3.setFecha("2026-05-28");
+		a3.setPresente(false);
+
+		when(asistenciaRepository.findByEstudianteId(10L)).thenReturn(Arrays.asList(a1, a2, a3));
+
+		mockMvc.perform(get("/asistencias/estudiante/{estudianteId}", 10L)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(3)));
+	}
+
+	@Test
+	void obtenerPorId_conIdValido_debeRetornarAsistencia() throws Exception {
+		Asistencia asistencia = new Asistencia();
+		asistencia.setId(1L);
+		asistencia.setEstudianteId(10L);
+		asistencia.setFecha("2026-05-30");
+		asistencia.setPresente(true);
+
+		when(asistenciaRepository.findById(1L)).thenReturn(Optional.of(asistencia));
+
+		mockMvc.perform(get("/asistencias/{id}", 1L).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.estudianteId", is(10)))
+				.andExpect(jsonPath("$.presente", is(true)));
+	}
+
+	@Test
+	void eliminar_conIdValido_debeRetornarNoContent() throws Exception {
 		mockMvc.perform(delete("/asistencias/{id}", 1L))
 				.andExpect(status().isNoContent());
 
 		verify(asistenciaRepository, times(1)).deleteById(1L);
+	}
+
+	@Test
+	void eliminar_conIdInexistente_debeRetornarNoContent() throws Exception {
+		mockMvc.perform(delete("/asistencias/{id}", 999L))
+				.andExpect(status().isNoContent());
+
+		verify(asistenciaRepository, times(1)).deleteById(999L);
 	}
 }

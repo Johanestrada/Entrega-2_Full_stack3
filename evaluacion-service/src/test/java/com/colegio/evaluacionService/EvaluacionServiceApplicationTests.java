@@ -100,6 +100,104 @@ class EvaluacionServiceApplicationTests {
 	}
 
 	@Test
+	void guardar_conDatosValidos_debeRetornarCreado() throws Exception {
+		Evaluacion ev = new Evaluacion(1L, "Matemáticas", 6.5);
+		ev.setId(10L);
+
+		when(evaluacionRepository.save(any())).thenReturn(ev);
+
+		mockMvc.perform(post("/evaluaciones")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"estudianteId\": 1, \"materia\": \"Matemáticas\", \"nota\": 6.5}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(10)))
+				.andExpect(jsonPath("$.materia", is("Matemáticas")));
+	}
+
+	@Test
+	void guardar_conDatosValidos_y_guardarEnBD() throws Exception {
+		Evaluacion ev = new Evaluacion(1L, "Matemáticas", 6.5);
+		ev.setId(10L);
+
+		when(evaluacionRepository.save(any(Evaluacion.class))).thenReturn(ev);
+
+		mockMvc.perform(post("/evaluaciones")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"estudianteId\": 1, \"materia\": \"Matemáticas\", \"nota\": 6.5}"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void obtenerPorEstudiante_debeRetornarListaFiltrada() throws Exception {
+		Evaluacion ev = new Evaluacion(1L, "Matemáticas", 6.5);
+		ev.setId(10L);
+
+		when(evaluacionRepository.findByEstudianteId(1L)).thenReturn(Collections.singletonList(ev));
+
+		mockMvc.perform(get("/evaluaciones/estudiante/{estudianteId}", 1L)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)));
+	}
+
+	@Test
+	void obtenerPorEstudiante_sinEvaluaciones_debeRetornarListaVacia() throws Exception {
+		when(evaluacionRepository.findByEstudianteId(99L)).thenReturn(Collections.emptyList());
+
+		mockMvc.perform(get("/evaluaciones/estudiante/{estudianteId}", 99L)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(0)));
+	}
+
+	@Test
+	void actualizar_conDatosValidos_debeActualizarNota() throws Exception {
+		Evaluacion ev = new Evaluacion(1L, "Matemáticas", 6.5);
+		ev.setId(10L);
+
+		when(evaluacionRepository.findById(10L)).thenReturn(Optional.of(ev));
+		when(evaluacionRepository.save(any())).thenReturn(ev);
+
+		mockMvc.perform(put("/evaluaciones/{id}", 10L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"nota\": 7.5}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(10)));
+	}
+
+	@Test
+	void eliminar_conIdValido_debeRetornarNoContent() throws Exception {
+		mockMvc.perform(delete("/evaluaciones/{id}", 10L)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
+
+		verify(evaluacionRepository, times(1)).deleteById(10L);
+	}
+
+	@Test
+	void listar_conResultados_debeRetornarOk() throws Exception {
+		Evaluacion ev1 = new Evaluacion(1L, "Matemáticas", 6.5);
+		ev1.setId(10L);
+
+		when(evaluacionRepository.findAll()).thenReturn(Collections.singletonList(ev1));
+
+		mockMvc.perform(get("/evaluaciones")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)));
+	}
+
+	@Test
+	void listar_sinResultados_debeRetornarOkConListaVacia() throws Exception {
+		when(evaluacionRepository.findAll()).thenReturn(Collections.emptyList());
+
+		mockMvc.perform(get("/evaluaciones")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(0)));
+	}
+
+	@Test
 	void guardar_debeRetornarEvaluacionCreada() throws Exception {
 		Evaluacion request = new Evaluacion(1L, "Matemáticas", 6.5);
 		Evaluacion response = new Evaluacion(1L, "Matemáticas", 6.5);

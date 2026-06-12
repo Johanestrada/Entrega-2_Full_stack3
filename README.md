@@ -1,3 +1,32 @@
+# Entrega-2_Full_stack3
+
+## Ejecutar tests (BFF)
+
+Desde la carpeta `bff-service` puedes ejecutar los tests con Maven Wrapper:
+
+```powershell
+cd bff-service
+.\mvnw test
+```
+
+Para ejecutar sólo los tests principales de integración/E2E:
+
+```powershell
+.\mvnw test "-Dtest=AcademicoIntegrationTest,AcademicoE2ETest,BffServiceApplicationTests"
+```
+
+## Documentación y entregables
+
+La carpeta `documentation/` contiene los esqueletos de los documentos requeridos por la rúbrica:
+
+- `Descripcion_Persistencia.md` (convertir a PDF para la entrega)
+- `Informe_Pruebas_Unitarias.md` (convertir a PDF)
+- `API_REST_Especificacion.md` (convertir a PDF)
+- `video_checklist.md` (guion/checklist para los videos)
+- `repositorios.txt` (enlaces a los repositorios)
+
+Conviene convertir los `.md` a `.pdf` (ej. usando `pandoc`) antes del envío.
+
 # Entrega 2 - Full Stack III
 
 Este proyecto implementa una plataforma académica basada en microservicios para la gestión de estudiantes, asistencias y evaluaciones, incluyendo un Backend For Frontend (BFF).
@@ -9,6 +38,17 @@ Este proyecto implementa una plataforma académica basada en microservicios para
 - **bff-service**: Backend For Frontend que orquesta y compone datos de los microservicios.
 - **eureka-server**: Servidor Eureka para el descubrimiento de servicios.
 - **frontend**: Aplicación React para consumir el BFF y mostrar los datos académicos.
+
+## Diagrama de Arquitectura
+
+![Arquitectura de Microservicios](documentation/diagramma.png)
+
+**Flujo de comunicación:**
+- El usuario accede a través del Frontend React (puerto 4173)
+- Las solicitudes van al **BFF Service** (puerto 8084) vía HTTP/HTTPS
+- El BFF compone datos de los tres microservicios mediante WebClient
+- Cada microservicio consulta su propia BD (MySQL o H2)
+- Todos los servicios se registran con **Eureka Server** (puerto 8761) para descubrimiento dinámico
 
 ## Tecnologías principales
 - Java 17

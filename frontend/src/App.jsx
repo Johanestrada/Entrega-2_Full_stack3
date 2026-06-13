@@ -47,12 +47,11 @@ function App() {
               <Link className="nav-link" to="/login">
                 Login
               </Link>
-              <Link className="nav-link" to="/dashboard">
-                Dashboard
-              </Link>
+              
               <Link className="nav-link" to="/register">
                 Crear cuenta
               </Link>
+              
             </div>
           </div>
         </header>
@@ -66,6 +65,7 @@ function App() {
               path="/dashboard"
               element={user ? <DashboardPage handleLogout={handleLogout} /> : <Navigate to="/login" replace />}
             />
+              
           </Routes>
         </main>
 

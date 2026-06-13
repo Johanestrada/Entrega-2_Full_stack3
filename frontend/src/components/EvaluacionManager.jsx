@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getStudentsByCourse, getAcademicDataByRun, postNewEvaluation } from '../services/academicApi';
+import { getStudentsByCourse, getAcademicDataByRun, postNewEvaluation, updateEvaluation, deleteEvaluation } from '../services/academicApi';
 import SearchForm from './SearchForm';
 
 import './ModernManager.css';
@@ -84,14 +84,9 @@ export default function EvaluacionManager() {
       return;
     }
 
-    try {
-      const response = await fetch(`http://localhost:8084/academico/evaluaciones/${evaluacionId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nota: parseFloat(editNota) }),
-      });
 
-      if (!response.ok) throw new Error('Error al actualizar evaluación');
+    try {
+      await updateEvaluation(evaluacionId, parseFloat(editNota));
 
       setEvaluaciones(evaluaciones.map(e => 
         e.id === evaluacionId ? { ...e, nota: parseFloat(editNota), materia: editMateria } : e
@@ -109,11 +104,7 @@ export default function EvaluacionManager() {
     if (!window.confirm('¿Eliminar esta evaluación?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8084/academico/evaluaciones/${evaluacionId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar evaluación.');
+      await deleteEvaluation(evaluacionId);
 
       setEvaluaciones(evaluaciones.filter((e) => e.id !== evaluacionId));
       setError(null);

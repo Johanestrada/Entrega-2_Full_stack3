@@ -84,3 +84,17 @@ export function getAttendanceByStudentId(studentId) {
   // Igual que con evaluaciones, reutilizamos el endpoint existente.
   return getAcademicDataByRun(studentId).then(data => data.asistencias || []);
 }
+
+export function updateEvaluation(id, nota) {
+  return fetchApi(`/academico/evaluaciones/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nota }),
+  });
+}
+
+export function deleteEvaluation(id) {
+  return fetchApi(`/academico/evaluaciones/${id}`, {
+    method: 'DELETE',
+  });
+}

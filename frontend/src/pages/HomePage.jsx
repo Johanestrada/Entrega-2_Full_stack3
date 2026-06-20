@@ -1,92 +1,87 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import carousel1 from '../assets/img/1-Estudiantes.jpg';
+import carousel2 from '../assets/img/UBO-2.jpg';
+import imgA from '../assets/img/A_UNO_1722396 (1).jpg.jpeg';
+import imgB from '../assets/img/foto_0000000220260619222408.jpg';
+import imgC from '../assets/img/images.jpg';
 
 export default function HomePage() {
   return (
-    <section className="home-landing">
-      <div className="container py-5">
-        <div className="row align-items-center g-5">
-          <div className="col-lg-6">
-            <span className="eyebrow-pill">Portal académico</span>
-            <h1 className="display-4 fw-bold text-white mt-3">
-              Una interfaz limpia para seguir estudiantes, notas y asistencia.
-            </h1>
-            <p className="lead text-white-50 mt-3 mb-4">
-              Diseñamos una experiencia visual más moderna con Bootstrap, paneles con profundidad y una composición inspirada en escenas 3D.
-            </p>
-            <div className="d-flex flex-wrap gap-3">
-              <Link className="btn btn-light btn-lg px-4" to="/login">
-                Iniciar sesión
-              </Link>
+    <section className="home-landing bg-white text-dark">
+      {/* Carrusel full-width pegado al header (sin espacio) */}
+      <div className="container-fluid px-0">
+        <div id="homeCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="1000">
+          <div className="carousel-indicators">
+            <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" className="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+          </div>
+          <div className="carousel-inner">
+            <div className="carousel-item active">
+              <img src={carousel1} className="d-block w-100" alt="Estudiantes" style={{ height: 420, objectFit: 'cover' }} />
+              <div className="carousel-caption d-none d-md-block text-dark">
+                <h5>Bienvenido al Portal Académico Bernardo O’Higgins</h5>
+                <p>Accede fácilmente a información de estudiantes, evaluaciones y asistencia.</p>
+              </div>
             </div>
-
-            <div className="row g-3 mt-4">
-              <div className="col-sm-4">
-                <div className="mini-metric">
-                  <strong>RUN</strong>
-                  <span>Búsqueda rápida</span>
-                </div>
+            <div className="carousel-item">
+              <img src={carousel2} className="d-block w-100" alt="UBO" style={{ height: 420, objectFit: 'cover' }} />
+              <div className="carousel-caption d-none d-md-block text-dark">
+                <h5>Herramientas para docentes</h5>
+                <p>Gestión rápida de notas y controles de asistencia.</p>
               </div>
-              <div className="col-sm-4">
-                <div className="mini-metric">
-                  <strong>Notas</strong>
-                  <span>Edición simple</span>
-                </div>
-              </div>
-              <div className="col-sm-4">
-                <div className="mini-metric">
-                  <strong>Asistencia</strong>
-                  <span>Control diario</span>
-                </div>
+            </div>
+            <div className="carousel-item">
+              <img src={carousel1} className="d-block w-100" alt="Información familias" style={{ height: 420, objectFit: 'cover' }} />
+              <div className="carousel-caption d-none d-md-block text-dark">
+                <h5>Información para familias</h5>
+                <p>Mantente al día con el desempeño y eventos del colegio.</p>
               </div>
             </div>
           </div>
+          <button className="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Anterior</span>
+          </button>
+          <button className="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+            <span className="carousel-control-next-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Siguiente</span>
+          </button>
+        </div>
+      </div>
 
-          <div className="col-lg-6">
-            <div className="scene-panel">
-              <div className="orb orb-one" />
-              <div className="orb orb-two" />
-              <div className="orb orb-three" />
-              <div className="glass-card scene-card scene-card-top">
-                <span className="badge rounded-pill text-bg-info-subtle text-info-emphasis mb-2">Vista general</span>
-                <h2 className="h4 text-white mb-1">Colegio conectado</h2>
-                <p className="mb-0 text-white-50">Datos académicos organizados en una pantalla limpia.</p>
-              </div>
-              <div className="glass-card scene-card scene-card-bottom">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <small className="text-white-50 d-block">Estado del sistema</small>
-                    <strong className="text-white">Operativo</strong>
+      <div className="container py-5 mt-0">
+
+        {/* Sección de noticias (tarjetas locales) */}
+        <div className="row mb-5">
+          <div className="col-12">
+            <h2 className="h4 mb-3">Noticias</h2>
+            <div className="row g-3">
+              {[
+                { title: 'Apertura de curso 2026', text: 'Fechas y actividades de inicio del año lectivo.', img: imgA, link: '#' },
+                { title: 'Charla para familias', text: 'Invitación a reunión informativa sobre evaluación.', img: imgB, link: '#' },
+                { title: 'Mantenimiento programado', text: 'Aviso de mantenimiento del sistema el fin de semana.', img: imgC, link: '#' },
+              ].map((n, i) => (
+                <div className="col-md-4" key={i}>
+                  <div className="card news-card h-100">
+                    {n.img && <img src={n.img} className="card-img-top" alt={n.title} style={{ height: 180, objectFit: 'cover' }} />}
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">{n.title}</h5>
+                      <p className="card-text text-body-secondary flex-grow-1">{n.text}</p>
+                      <div className="mt-2 d-flex justify-content-between align-items-center">
+                        <small className="text-muted">Portal</small>
+                        <a href={n.link} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary">Ver noticia</a>
+                      </div>
+                    </div>
                   </div>
-                  <div className="pulse-dot" />
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="row g-4 mt-5">
-          {[
-            {
-              title: 'Estudiantes',
-              text: 'Gestiona registros con tarjetas limpias y jerarquía clara.',
-            },
-            {
-              title: 'Evaluaciones',
-              text: 'Bloques visuales y acciones fáciles de escanear.',
-            },
-            {
-              title: 'Asistencias',
-              text: 'Paneles consistentes con foco en lectura rápida.',
-            },
-          ].map((item) => (
-            <div className="col-md-4" key={item.title}>
-              <div className="feature-card h-100">
-                <h3 className="h5">{item.title}</h3>
-                <p className="mb-0 text-body-secondary">{item.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* "Últimos estudiantes" movidos a la vista de Alumnos */}
       </div>
     </section>
   );

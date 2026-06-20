@@ -48,3 +48,26 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+/* New dashboard styles */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+}
+.dashboard-sidebar {
+  height: calc(100vh - 120px);
+  position: sticky;
+  top: 80px;
+  border-radius: 12px;
+}
+.dashboard-main {
+  min-height: 60vh;
+}
+.sidebar-header h2 { margin-bottom: 0.25rem; }
+.sidebar-header .muted { color: #6b7280; }
+.nav-link.active { background: linear-gradient(90deg,#eef2ff,#fff); border-left: 4px solid #7c3aed; }
+.dashboard-top { border-radius: 10px; }
+.dashboard-cards .card { border-radius: 10px; }
+.dashboard-content { padding: 0; }
+.dashboard-main .card { margin-bottom: 0.75rem; }

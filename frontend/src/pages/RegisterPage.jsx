@@ -55,7 +55,7 @@ export default function RegisterPage() {
               <div className="auth-panel card border-0 shadow-lg">
                 <div className="card-body p-4 p-md-5">
                   <h2 className="h3 fw-bold mb-2">Registro</h2>
-                  <p className="text-body-secondary mb-4">Crea tu cuenta para usar el portal académico.</p>
+                  <p className="text-body-secondary mb-4">Crea tu cuenta para usar el Portal Académico Bernardo O’Higgins.</p>
 
                   <form className="vstack gap-3" onSubmit={handleSubmit}>
                     <div>

@@ -11,13 +11,19 @@ function getToken() {
 }
 
 async function fetchApi(path, options = {}) {
+  // Soporte para peticiones sin auth: pasar { skipAuth: true } en options
+  const { skipAuth, ...fetchOptions } = options || {};
   const token = getToken();
-  const headers = { ...(options.headers || {}) };
-  if (token) {
+  const headers = { ...(fetchOptions.headers || {}) };
+  if (!skipAuth && token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch(`${BFF_URL}${path}`, { ...options, headers });
+  const response = await fetch(`${BFF_URL}${path}`, { ...fetchOptions, headers });
   if (!response.ok) {
+    // Manejar 404 de forma no excepcional: permitir que el caller trate 'null' como "no encontrado"
+    if (response.status === 404) {
+      return null;
+    }
     const errorBody = await response.text();
     throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorBody}`);
   }
@@ -29,7 +35,17 @@ async function fetchApi(path, options = {}) {
 }
 
 export function getAcademicDataByRun(run) {
+  // If there's no token available, call the public variant to avoid 401 from the BFF
+  const token = getToken();
+  if (!token) {
+    return fetchApi(`/academico/run/${run}`, { skipAuth: true });
+  }
   return fetchApi(`/academico/run/${run}`);
+}
+
+// Variante pública que no incluye Authorization (útil para búsqueda de estudiante sin sesión)
+export function getAcademicDataByRunPublic(run) {
+  return fetchApi(`/academico/run/${run}`, { skipAuth: true });
 }
 
 export function getStudentsByCourse(curso) {

@@ -1,21 +1,25 @@
-function SearchForm({ query, onSetQuery, mode, onSetMode, onBuscarAcademico }) {
+function SearchForm({ query, onSetQuery, mode, onSetMode, onBuscarAcademico, allowRun = true }) {
   return (
     <form className="search-form" onSubmit={onBuscarAcademico}>
       <div className="search-mode">
         <span className="search-mode-label">Buscar por</span>
         <div className="btn-group search-toggle" role="group" aria-label="Modo de búsqueda">
-          <input
-            type="radio"
-            className="btn-check"
-            name="searchMode"
-            id="searchModeRun"
-            value="run"
-            checked={mode === 'run'}
-            onChange={(event) => onSetMode(event.target.value)}
-          />
-          <label className={`btn btn-outline-primary ${mode === 'run' ? 'active' : ''}`} htmlFor="searchModeRun">
-            RUN
-          </label>
+          {allowRun && (
+            <>
+              <input
+                type="radio"
+                className="btn-check"
+                name="searchMode"
+                id="searchModeRun"
+                value="run"
+                checked={mode === 'run'}
+                onChange={(event) => onSetMode(event.target.value)}
+              />
+              <label className={`btn btn-outline-primary ${mode === 'run' ? 'active' : ''}`} htmlFor="searchModeRun">
+                RUN
+              </label>
+            </>
+          )}
 
           <input
             type="radio"

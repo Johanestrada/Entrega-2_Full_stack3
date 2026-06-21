@@ -11,7 +11,7 @@ export default function HomePage() {
     <section className="home-landing bg-white text-dark">
       {/* Carrusel full-width pegado al header (sin espacio) */}
       <div className="container-fluid px-0">
-        <div id="homeCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="1000">
+        <div id="homeCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
           <div className="carousel-indicators">
             <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" className="active" aria-current="true" aria-label="Slide 1"></button>
             <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -19,22 +19,22 @@ export default function HomePage() {
           </div>
           <div className="carousel-inner">
             <div className="carousel-item active">
-              <img src={carousel1} className="d-block w-100" alt="Estudiantes" style={{ height: 420, objectFit: 'cover' }} />
-              <div className="carousel-caption d-none d-md-block text-dark">
+              <img src={carousel1} className="home-carousel-img d-block w-100" alt="Estudiantes" />
+              <div className="carousel-caption carousel-caption-custom text-white">
                 <h5>Bienvenido al Portal Académico Bernardo O’Higgins</h5>
                 <p>Accede fácilmente a información de estudiantes, evaluaciones y asistencia.</p>
               </div>
             </div>
             <div className="carousel-item">
-              <img src={carousel2} className="d-block w-100" alt="UBO" style={{ height: 420, objectFit: 'cover' }} />
-              <div className="carousel-caption d-none d-md-block text-dark">
+              <img src={carousel2} className="home-carousel-img d-block w-100" alt="UBO" />
+              <div className="carousel-caption carousel-caption-custom text-white">
                 <h5>Herramientas para docentes</h5>
                 <p>Gestión rápida de notas y controles de asistencia.</p>
               </div>
             </div>
             <div className="carousel-item">
-              <img src={carousel1} className="d-block w-100" alt="Información familias" style={{ height: 420, objectFit: 'cover' }} />
-              <div className="carousel-caption d-none d-md-block text-dark">
+              <img src={carousel1} className="home-carousel-img d-block w-100" alt="Información familias" />
+              <div className="carousel-caption carousel-caption-custom text-white">
                 <h5>Información para familias</h5>
                 <p>Mantente al día con el desempeño y eventos del colegio.</p>
               </div>

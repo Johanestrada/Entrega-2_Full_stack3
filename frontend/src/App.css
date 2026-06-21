@@ -441,3 +441,33 @@ a {
     font-size: 2.2rem;
   }
 }
+
+/* Carousel / hero adjustments */
+.home-carousel-img {
+  height: calc(70vh - 72px);
+  min-height: 340px;
+  max-height: 820px;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-caption-custom {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 2.25rem;
+  text-align: left;
+  background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.15));
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+}
+
+.carousel-caption-custom h5,
+.carousel-caption-custom p {
+  color: #fff !important;
+}
+
+@media (max-width: 767px) {
+  .home-carousel-img { height: 50vh; }
+  .carousel-caption-custom { bottom: 1rem; left: 0.75rem; right: 0.75rem; padding: 0.8rem; }
+}

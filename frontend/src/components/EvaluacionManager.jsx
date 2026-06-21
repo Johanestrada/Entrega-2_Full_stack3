@@ -213,85 +213,77 @@ export default function EvaluacionManager() {
           <div style={{ marginBottom: '1.5rem' }}>
             <h2>Resultados de la búsqueda</h2>
             <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
-              Haz click en el nombre para ver las evaluaciones y gestionar notas.
+              Usa las acciones para ver detalles o agregar calificaciones.
             </p>
           </div>
 
-          <div className="student-grid">
-            {estudiantes.map((student) => (
-              <article key={student.id} className="student-card">
-                <button
-                  onClick={() => toggleStudentDetails(student)}
-                  className="student-card-header"
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <h4>{student.nombre}</h4>
-                      <p>RUN {student.run}</p>
-                    </div>
-                    <div className="toggle-icon">
-                      {expandedStudent?.id === student.id ? '▼' : '▶'}
-                    </div>
-                  </div>
-                </button>
+          <div className="manager-section">
+            {status === 'success' && (
+              <div className="table-responsive">
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>RUN</th>
+                      <th>Curso</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estudiantes.map((student) => (
+                      <tr key={student.id}>
+                        <td>{student.nombre}</td>
+                        <td>{student.run}</td>
+                        <td>{student.curso}</td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => toggleStudentDetails(student)}>
+                            Detalles
+                          </button>
+                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleSelectStudent(student)}>
+                            Agregar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-                {expandedStudent?.id === student.id && (
-                  <div className="student-details">
-                    <h5>Evaluaciones</h5>
-                    {evaluaciones.length > 0 ? (
-                      <ul className="details-list">
-                        {evaluaciones.map((evaluacion) => (
-                          <li key={evaluacion.id}>
-                            {editingId === evaluacion.id ? (
-                              <div className="edit-form">
-                                <input
-                                  type="text"
-                                  value={editMateria}
-                                  onChange={(e) => setEditMateria(e.target.value)}
-                                  className="edit-input"
-                                  disabled 
-                                />
-                                <input
-                                  type="number"
-                                  value={editNota}
-                                  onChange={(e) => setEditNota(e.target.value)}
-                                  className="edit-input"
-                                  step="0.1"
-                                />
-                                <div className="edit-actions">
-                                  <button onClick={() => handleEditEvaluacion(evaluacion.id)} className="btn-save">Guardar</button>
-                                  <button onClick={cancelEditing} className="btn-cancel">Cancelar</button>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <span>{evaluacion.materia}</span>
-                                <div className="details-actions">
-                                  <span className={evaluacion.nota >= 4 ? 'nota-buena' : 'nota-mala'}>{evaluacion.nota}</span>
-                                  <button onClick={() => startEditing(evaluacion)} className="btn-edit">Editar</button>
-                                  <button onClick={() => handleDeleteEvaluacion(evaluacion.id)} className="btn-delete">Eliminar</button>
-                                </div>
-                              </>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>Sin evaluaciones registradas.</p>
-                    )}
-                  </div>
+            {expandedStudent && (
+              <div className="student-details mt-3">
+                <h5>Evaluaciones de {expandedStudent.nombre}</h5>
+                {evaluaciones.length > 0 ? (
+                  <ul className="details-list">
+                    {evaluaciones.map((evaluacion) => (
+                      <li key={evaluacion.id}>
+                        {editingId === evaluacion.id ? (
+                          <div className="edit-form">
+                            <input type="text" value={editMateria} onChange={(e) => setEditMateria(e.target.value)} className="edit-input" disabled />
+                            <input type="number" value={editNota} onChange={(e) => setEditNota(e.target.value)} className="edit-input" step="0.1" />
+                            <div className="edit-actions">
+                              <button onClick={() => handleEditEvaluacion(evaluacion.id)} className="btn-save">Guardar</button>
+                              <button onClick={cancelEditing} className="btn-cancel">Cancelar</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <span>{evaluacion.materia}</span>
+                            <div className="details-actions">
+                              <span className={evaluacion.nota >= 4 ? 'nota-buena' : 'nota-mala'}>{evaluacion.nota}</span>
+                              <button onClick={() => startEditing(evaluacion)} className="btn-edit">Editar</button>
+                              <button onClick={() => handleDeleteEvaluacion(evaluacion.id)} className="btn-delete">Eliminar</button>
+                            </div>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Sin evaluaciones registradas.</p>
                 )}
-
-                <div className="card-actions">
-                  <button
-                    onClick={() => handleSelectStudent(student)}
-                    className="btn-add-eval"
-                  >
-                    Agregar Calificación
-                  </button>
-                </div>
-              </article>
-            ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

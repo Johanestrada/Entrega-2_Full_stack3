@@ -42,8 +42,7 @@ export default function StudentDashboard() {
           <p className="text-muted">RUN: {estudiante.run} • Curso: {estudiante.curso}</p>
         </div>
         <div>
-          <button className="btn btn-secondary me-2" onClick={() => navigate(-1)}>Volver</button>
-          <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Ir al dashboard</button>
+          <button className="btn btn-secondary" onClick={() => navigate(-1)}>Volver</button>
         </div>
       </div>
 

@@ -44,36 +44,8 @@ export default function DashboardPage({ handleLogout }) {
             <button onClick={handleLogout} className="btn btn-danger w-100">Cerrar sesión</button>
           </div>
         </aside>
-
-        <main className="dashboard-main">
-          <div className="dashboard-top card border-0 mb-4 p-3 shadow-sm">
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h3 className="mb-0">{activeTab === 'estudiantes' ? 'Gestión de Estudiantes' : activeTab === 'evaluaciones' ? 'Evaluaciones' : 'Asistencias'}</h3>
-                <p className="text-muted small mb-0">Administra la información relevante desde este panel.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-cards">
-            <div className="row g-3">
-              <div className="col-md-6">
-                <div className="card p-3 shadow-sm">
-                  <h5 className="mb-2">Acciones rápidas</h5>
-                  <p className="text-muted small">Accede a las funciones más usadas: agregar estudiante, crear evaluación o registrar asistencia.</p>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="card p-3 shadow-sm">
-                  <h5 className="mb-2">Resumen</h5>
-                  <p className="text-muted small">Estudiantes activos, últimas evaluaciones y asistencias recientes.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-content mt-4">{renderContent()}</div>
-        </main>
+        <div className="dashboard-content mt-4">{renderContent()}</div>
+        
       </div>
     </section>
   );

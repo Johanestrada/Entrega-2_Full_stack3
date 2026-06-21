@@ -56,9 +56,13 @@
   gap: 24px;
 }
 .dashboard-sidebar {
-  height: calc(100vh - 120px);
+  /* Ensure the sidebar doesn't push content down and stays visible */
   position: sticky;
-  top: 80px;
+  top: 20px;
+  align-self: start;
+  height: auto;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   border-radius: 12px;
 }
 .dashboard-main {
@@ -69,5 +73,5 @@
 .nav-link.active { background: linear-gradient(90deg,#eef2ff,#fff); border-left: 4px solid #7c3aed; }
 .dashboard-top { border-radius: 10px; }
 .dashboard-cards .card { border-radius: 10px; }
-.dashboard-content { padding: 0; }
+.dashboard-content { padding: 1rem; }
 .dashboard-main .card { margin-bottom: 0.75rem; }

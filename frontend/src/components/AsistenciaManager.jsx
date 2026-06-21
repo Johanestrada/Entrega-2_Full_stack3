@@ -120,58 +120,62 @@ export default function AsistenciaManager() {
           <div style={{ marginBottom: '1.5rem' }}>
             <h2>Resultados de la búsqueda</h2>
             <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
-              Haz click en el nombre para ver el historial de asistencias.
+              Usa las acciones para ver historial o marcar asistencia.
             </p>
           </div>
 
-          <div className="student-grid">
-            {estudiantes.map((student) => (
-              <article key={student.id} className="student-card">
-                <button
-                  onClick={() => toggleStudentDetails(student)}
-                  className="student-card-header"
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <h4>{student.nombre}</h4>
-                      <p>RUN {student.run}</p>
-                    </div>
-                    <div className="toggle-icon">
-                      {expandedStudent?.id === student.id ? '▼' : '▶'}
-                    </div>
-                  </div>
-                </button>
+          <div className="manager-section">
+            {status === 'success' && (
+              <div className="table-responsive">
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>RUN</th>
+                      <th>Curso</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estudiantes.map((student) => (
+                      <tr key={student.id}>
+                        <td>{student.nombre}</td>
+                        <td>{student.run}</td>
+                        <td>{student.curso}</td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => toggleStudentDetails(student)}>
+                            Historial
+                          </button>
+                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleSelectStudent(student)}>
+                            Marcar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-                {expandedStudent?.id === student.id && (
-                  <div className="student-details">
-                    <h5>Asistencias</h5>
-                    {asistencias.length > 0 ? (
-                      <ul className="details-list">
-                        {asistencias.map((asistencia) => (
-                          <li key={asistencia.id}>
-                            <span>{new Date(asistencia.fecha).toLocaleDateString()}</span>
-                            <span className={asistencia.presente ? 'asistencia-presente' : 'asistencia-ausente'}>
-                              {asistencia.presente ? 'Presente' : 'Ausente'}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>Sin registros de asistencia.</p>
-                    )}
-                  </div>
+            {expandedStudent && (
+              <div className="student-details mt-3">
+                <h5>Asistencias de {expandedStudent.nombre}</h5>
+                {asistencias.length > 0 ? (
+                  <ul className="details-list">
+                    {asistencias.map((asistencia) => (
+                      <li key={asistencia.id}>
+                        <span>{new Date(asistencia.fecha).toLocaleDateString()}</span>
+                        <span className={asistencia.presente ? 'asistencia-presente' : 'asistencia-ausente'}>
+                          {asistencia.presente ? 'Presente' : 'Ausente'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Sin registros de asistencia.</p>
                 )}
-
-                <div className="card-actions">
-                  <button
-                    onClick={() => handleSelectStudent(student)}
-                    className="btn-add-asistencia"
-                  >
-                    Marcar Asistencia
-                  </button>
-                </div>
-              </article>
-            ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

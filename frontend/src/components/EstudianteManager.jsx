@@ -13,20 +13,10 @@ export default function EstudianteManager() {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
 
-  // Recent students (persisted from creación)
-  const [recentStudents, setRecentStudents] = useState([]);
-  const [confirmRunFor, setConfirmRunFor] = useState(null);
-  const [inputRun, setInputRun] = useState('');
-  const [confirmError, setConfirmError] = useState('');
-  const normalizeRun = (s) => (s || '').toString().replace(/[^0-9kK]/g, '').toLowerCase();
+  // removed recent students UI; teachers can search by RUN directly
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('recentStudents');
-      setRecentStudents(raw ? JSON.parse(raw) : []);
-    } catch (e) {
-      setRecentStudents([]);
-    }
+    // no-op: removed recent students usage
   }, []);
 
   // Estados para la búsqueda
@@ -107,20 +97,7 @@ export default function EstudianteManager() {
       setRun('');
       setCurso('');
       setShowForm(false);
-      // Guardar RUN en localStorage para acceso posterior aunque se cierre sesión
-      try {
-        const key = 'recentStudents';
-        const targetRun = (nuevoEstudiante && (nuevoEstudiante.run || nuevoEstudiante.rut)) || run;
-        if (targetRun) {
-          const raw = localStorage.getItem(key);
-          const list = raw ? JSON.parse(raw) : [];
-          const normalized = targetRun.toString();
-          const updated = [normalized, ...list.filter((r) => r !== normalized)].slice(0, 5);
-          localStorage.setItem(key, JSON.stringify(updated));
-        }
-      } catch (e) {
-        // ignore storage errors
-      }
+      // (no recentStudents persistence)
     } catch (err) {
       console.error("Error al agregar estudiante:", err);
       setError(err.message || 'No se pudo agregar el estudiante. Inténtalo de nuevo.');
@@ -167,23 +144,7 @@ export default function EstudianteManager() {
         </div>
 
         {/* Últimos estudiantes creados (solo visible en la vista Alumnos) */}
-        {recentStudents.length > 0 && (
-          <section className="manager-section">
-            <h3>Últimos estudiantes creados</h3>
-            <div className="d-flex gap-2 flex-wrap mb-3">
-              {recentStudents.map((r) => (
-                <button
-                  type="button"
-                  key={r}
-                  className="btn btn-outline-primary"
-                  onClick={() => { setConfirmRunFor(r); setInputRun(''); setConfirmError(''); }}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* removed 'Últimos estudiantes creados' section */}
 
         {showForm && (
           <section className="form-add">
@@ -220,9 +181,9 @@ export default function EstudianteManager() {
                 query={query}
                 onSetQuery={setQuery}
                 mode={mode}
-                onSetMode={isStandalone ? setMode : () => {}}
+                onSetMode={setMode}
                 onBuscarAcademico={handleSearch}
-                allowRun={isStandalone}
+                allowRun={true}
               />
           </section>
         )}
@@ -235,59 +196,56 @@ export default function EstudianteManager() {
           {status === 'loading' && <p>Buscando...</p>}
           {status === 'error' && <p style={{ color: '#b91c1c' }}>{error}</p>}
 
-          <div className="student-grid">
-            {status === 'success' && estudiantes.map((student) => (
-              <article key={student.id} className="student-card">
-                <div className="student-card-header" style={{ paddingBottom: '1rem' }}>
-                  <div>
-                    <h4 style={{ color: '#5b21b6' }}>{student.nombre}</h4>
-                    <p>RUN: {student.run}</p>
-                    <p>Curso: {student.curso}</p>
-                  </div>
+            <div className="manager-section">
+              {status === 'success' && (
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>RUN</th>
+                        <th>Curso</th>
+                        <th>Promedio</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {estudiantes.map((student) => (
+                        <tr key={student.id}>
+                          <td>{student.nombre}</td>
+                          <td>{student.run}</td>
+                          <td>{student.curso}</td>
+                          <td>{student.promedio ?? student.promedioFinal ?? '-'}</td>
+                          <td>
+                            <button
+                              className="btn btn-sm btn-outline-primary me-2"
+                              onClick={() => navigate(`/estudiante/${encodeURIComponent(student.run)}`)}
+                            >
+                              Ver
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleDelete(student.id)}
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-
-                <div className="card-actions">
-                  <button
-                    onClick={() => handleDelete(student.id)}
-                    style={{ backgroundColor: '#dc2626', color: 'white' }}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+              )}
+              {status === 'success' && estudiantes.length === 0 && (
+                <p>No se encontraron estudiantes con ese criterio.</p>
+              )}
+            </div>
           {status === 'success' && estudiantes.length === 0 && (
             <p>No se encontraron estudiantes con ese criterio.</p>
           )}
         </section>
       </div>
-      {/* Modal para confirmar RUT antes de mostrar dashboard del estudiante */}
-      {confirmRunFor && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div className="card p-4" style={{ width: 420 }}>
-            <h5 className="mb-2">Confirmar identidad</h5>
-            <p className="text-muted">Ingresa tu RUT para ver el dashboard de <strong>{confirmRunFor}</strong></p>
-            <input className="form-control mb-2" value={inputRun} onChange={(e) => setInputRun(e.target.value)} placeholder="Ingresa tu RUT" />
-            {confirmError && <div className="text-danger mb-2">{confirmError}</div>}
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-outline-secondary" onClick={() => { setConfirmRunFor(null); setInputRun(''); setConfirmError(''); }}>Cancelar</button>
-              <button className="btn btn-primary" onClick={() => {
-                const entered = normalizeRun(inputRun);
-                const target = normalizeRun(confirmRunFor);
-                if (!entered) { setConfirmError('Ingresa un RUT válido'); return; }
-                if (entered === target) {
-                  setConfirmError('');
-                  setConfirmRunFor(null);
-                  navigate(`/estudiante/${encodeURIComponent(confirmRunFor)}`);
-                } else {
-                  setConfirmError('RUT no coincide con el estudiante seleccionado');
-                }
-              }}>Ver dashboard</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* removed recent-students confirmation modal */}
     </div>
   );
 }

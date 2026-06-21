@@ -43,13 +43,28 @@ export function getAcademicDataByRun(run) {
   return fetchApi(`/academico/run/${run}`);
 }
 
+// Conveniencia para que los hooks/consumidores pidan datos por `run` o `curso`.
+export async function fetchAcademicData(query, mode = 'run') {
+  const token = getToken();
+  if (mode === 'curso') {
+    // Permitir llamada pública cuando no hay token para evitar 401 en vistas públicas
+    return fetchApi(`/academico/curso/${query}`, { skipAuth: !token });
+  }
+  // Por defecto, tratamos `query` como RUN
+  if (!token) {
+    return fetchApi(`/academico/run/${query}`, { skipAuth: true });
+  }
+  return fetchApi(`/academico/run/${query}`);
+}
+
 // Variante pública que no incluye Authorization (útil para búsqueda de estudiante sin sesión)
 export function getAcademicDataByRunPublic(run) {
   return fetchApi(`/academico/run/${run}`, { skipAuth: true });
 }
 
 export function getStudentsByCourse(curso) {
-  return fetchApi(`/academico/curso/${curso}`);
+  const token = getToken();
+  return fetchApi(`/academico/curso/${curso}`, { skipAuth: !token });
 }
 
 export function postNewEvaluation({ estudianteId, materia, nota }) {

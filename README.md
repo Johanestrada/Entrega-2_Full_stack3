@@ -1,4 +1,4 @@
-# Entrega-2_Full_stack3
+# Proyecto Colegio Bernardo O'Higgins
 
 ## Ejecutar tests (BFF)
 
@@ -27,14 +27,13 @@ La carpeta `documentation/` contiene los documentos de entrega requeridos:
 
 Conviene incluir los `.pdf` en la entrega y verificar que estén actualizados.
 
-# Entrega 2 - Full Stack III
+# Proyecto Colegio Bernardo O'Higgins
 
-Este proyecto implementa una plataforma académica basada en microservicios para la gestión de estudiantes, asistencias y evaluaciones, incluyendo un Backend For Frontend (BFF).
+Este proyecto implementa una plataforma académica basada en microservicios para la gestión de estudiantes y asistencias, incluyendo un Backend For Frontend (BFF).
 
 ## Estructura del proyecto
 - **estudiante-service**: Microservicio para la gestión de estudiantes.
 - **asistencia-service**: Microservicio para el registro de asistencias.
-- **evaluacion-service**: Microservicio para la gestión de evaluaciones.
 - **bff-service**: Backend For Frontend que orquesta y compone datos de los microservicios.
 - **eureka-server**: Servidor Eureka para el descubrimiento de servicios.
 - **frontend**: Aplicación React para consumir el BFF y mostrar los datos académicos.
@@ -73,9 +72,6 @@ Este proyecto implementa una plataforma académica basada en microservicios para
    cd asistencia-service
    ./mvnw spring-boot:run
    
-   cd evaluacion-service
-   ./mvnw spring-boot:run
-   
    cd bff-service
    ./mvnw spring-boot:run
    ```
@@ -105,7 +101,6 @@ Consulta la carpeta [`documentation/`](./documentation/) para encontrar:
 Accede a la documentación de cada servicio en:
 - Estudiantes: http://localhost:8081/swagger-ui.html
 - Asistencias: http://localhost:8082/swagger-ui.html
-- Evaluaciones: http://localhost:8083/swagger-ui.html
 - BFF: http://localhost:8084/swagger-ui.html
 - Eureka: http://localhost:8761
 

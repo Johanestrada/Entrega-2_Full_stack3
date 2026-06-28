@@ -39,7 +39,7 @@ Este proyecto implementa una plataforma académica basada en microservicios para
 - **eureka-server**: Servidor Eureka para el descubrimiento de servicios.
 - **frontend**: Aplicación React para consumir el BFF y mostrar los datos académicos.
 
-## Diagrama de Arquitectura
+## Arquitectura del Sistema
 
 ![Arquitectura de Microservicios](documentation/diagramma.png)
 

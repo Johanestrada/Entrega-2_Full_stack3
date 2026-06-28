@@ -17,15 +17,15 @@ Para ejecutar sólo los tests principales de integración/E2E:
 
 ## Documentación y entregables
 
-La carpeta `documentation/` contiene los esqueletos de los documentos requeridos por la rúbrica:
+La carpeta `documentation/` contiene los documentos de entrega requeridos:
 
-- `Descripcion_Persistencia.md` (convertir a PDF para la entrega)
-- `Informe_Pruebas_Unitarias.md` (convertir a PDF)
-- `API_REST_Especificacion.md` (convertir a PDF)
-- `video_checklist.md` (guion/checklist para los videos)
-- `repositorios.txt` (enlaces a los repositorios)
+- `Descripcion_Persistencia.pdf`
+- `Informe_Pruebas_Unitarias.pdf`
+- `API_REST_Especificacion.pdf`
+- `video_checklist.md`
+- `repositorios.txt`
 
-Conviene convertir los `.md` a `.pdf` (ej. usando `pandoc`) antes del envío.
+Conviene incluir los `.pdf` en la entrega y verificar que estén actualizados.
 
 # Entrega 2 - Full Stack III
 
@@ -38,10 +38,6 @@ Este proyecto implementa una plataforma académica basada en microservicios para
 - **bff-service**: Backend For Frontend que orquesta y compone datos de los microservicios.
 - **eureka-server**: Servidor Eureka para el descubrimiento de servicios.
 - **frontend**: Aplicación React para consumir el BFF y mostrar los datos académicos.
-
-## Arquitectura del Sistema
-
-![Arquitectura de Microservicios](documentation/diagramma.png)
 
 **Flujo de comunicación:**
 - El usuario accede a través del Frontend React (puerto 4173)

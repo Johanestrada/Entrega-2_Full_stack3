@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4173")
 @RequestMapping("/estudiantes")
 public class EstudianteController {
 
@@ -60,3 +61,4 @@ public class EstudianteController {
         return ResponseEntity.noContent().build();
     }
 }
+

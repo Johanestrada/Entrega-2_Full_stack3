@@ -1,0 +1,37 @@
+/* Estudiantes Component Styles */
+
+.table {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.modal.d-block {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-dialog {
+  width: 90%;
+  max-width: 500px;
+}
+
+.spinner-border {
+  color: #0d6efd;
+}

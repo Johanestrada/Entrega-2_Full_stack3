@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.colegio.evaluacionService.model.Evaluacion;
 import com.colegio.evaluacionService.service.EvaluacionService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4173")
 @RequestMapping("/evaluaciones")
 public class EvaluacionController {
 
@@ -74,3 +76,4 @@ public class EvaluacionController {
         service.eliminar(id);
     }
 }
+

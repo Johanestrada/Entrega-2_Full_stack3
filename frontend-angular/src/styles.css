@@ -57,3 +57,35 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.brand {
+  width: 290px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.workspace {
+  margin-left: 290px;
+  width: calc(100% - 290px);
+}
+
+.login-brand {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+@media (max-width: 760px) {
+  .brand {
+    width: auto;
+    font-size: 0;
+  }
+
+  .workspace {
+    margin-left: 66px;
+    width: calc(100% - 66px);
+  }
+
+  .login-brand {
+    font-size: 16px;
+  }
+}

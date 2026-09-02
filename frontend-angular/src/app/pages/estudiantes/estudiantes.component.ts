@@ -15,6 +15,7 @@ export class EstudiantesComponent implements OnInit {
   selectedEstudiante: Estudiante | null = null;
   showForm = false;
   loading = false;
+  errorMessage = '';
   
   formData: Estudiante = {
     nombre: '',
@@ -45,6 +46,7 @@ export class EstudiantesComponent implements OnInit {
   }
 
   openForm(estudiante?: Estudiante): void {
+    this.errorMessage = '';
     if (estudiante) {
       this.formData = { ...estudiante };
       this.selectedEstudiante = estudiante;
@@ -68,16 +70,23 @@ export class EstudiantesComponent implements OnInit {
   closeForm(): void {
     this.showForm = false;
     this.resetForm();
+    this.errorMessage = '';
   }
 
   saveEstudiante(): void {
+    if (!this.formData.nombre?.trim() || !(this.formData.run ?? this.formData.rut)?.trim() || !(this.formData.curso ?? this.formData.matricula)?.trim()) {
+      this.errorMessage = 'Completa nombre, RUN y curso antes de guardar.';
+      return;
+    }
+
+    this.errorMessage = '';
     if (this.selectedEstudiante?.id) {
       this.estudianteService.actualizarEstudiante(this.selectedEstudiante.id, this.formData).subscribe({
         next: () => {
           this.loadEstudiantes();
           this.closeForm();
         },
-        error: (error) => console.error('Error al actualizar:', error)
+        error: () => this.errorMessage = 'No se pudo actualizar el estudiante. Comprueba que la API esté disponible.'
       });
     } else {
       this.estudianteService.crearEstudiante(this.formData).subscribe({
@@ -85,7 +94,7 @@ export class EstudiantesComponent implements OnInit {
           this.loadEstudiantes();
           this.closeForm();
         },
-        error: (error) => console.error('Error al crear:', error)
+        error: () => this.errorMessage = 'No se pudo crear el estudiante. Comprueba que la API esté disponible.'
       });
     }
   }

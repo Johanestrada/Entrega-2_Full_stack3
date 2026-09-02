@@ -22,21 +22,17 @@
     <table class="table table-hover">
       <thead class="table-dark">
         <tr>
-          <th>Matrícula</th>
           <th>Nombre</th>
-          <th>Apellido</th>
-          <th>Email</th>
-          <th>RUT</th>
+          <th>RUN</th>
+          <th>Curso</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let estudiante of estudiantes">
-          <td>{{ estudiante.matricula }}</td>
           <td>{{ estudiante.nombre }}</td>
-          <td>{{ estudiante.apellido }}</td>
-          <td>{{ estudiante.email }}</td>
-          <td>{{ estudiante.rut }}</td>
+          <td>{{ estudiante.run || estudiante.rut }}</td>
+          <td>{{ estudiante.curso || estudiante.matricula }}</td>
           <td>
             <button class="btn btn-sm btn-warning me-2" (click)="openForm(estudiante)">
               Editar
@@ -64,26 +60,20 @@
           <button type="button" class="btn-close" (click)="closeForm()"></button>
         </div>
         <div class="modal-body">
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+          <p class="text-muted small">Registra los datos básicos del alumno.</p>
           <form>
             <div class="mb-3">
               <label class="form-label">Nombre</label>
               <input type="text" class="form-control" [(ngModel)]="formData.nombre" name="nombre" required />
             </div>
             <div class="mb-3">
-              <label class="form-label">Apellido</label>
-              <input type="text" class="form-control" [(ngModel)]="formData.apellido" name="apellido" required />
+              <label class="form-label">RUN</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.run" name="run" placeholder="Ej: 22.333.444-5" required />
             </div>
             <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" [(ngModel)]="formData.email" name="email" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Matrícula</label>
-              <input type="text" class="form-control" [(ngModel)]="formData.matricula" name="matricula" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">RUT</label>
-              <input type="text" class="form-control" [(ngModel)]="formData.rut" name="rut" required />
+              <label class="form-label">Curso</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.curso" name="curso" placeholder="Ej: 1-A" required />
             </div>
           </form>
         </div>

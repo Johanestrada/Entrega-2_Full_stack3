@@ -2,11 +2,20 @@ package com.colegio.estudianteservice.controller;
 
 import java.util.List;
 
-import com.colegio.estudianteservice.model.Estudiante;
-import com.colegio.estudianteservice.service.EstudianteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.colegio.estudianteservice.model.Estudiante;
+import com.colegio.estudianteservice.service.EstudianteService;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4173")
@@ -53,6 +62,18 @@ public class EstudianteController {
     public ResponseEntity<Estudiante> guardar(@RequestBody Estudiante estudiante) {
         Estudiante nuevoEstudiante = estudianteService.save(estudiante);
         return ResponseEntity.ok(nuevoEstudiante);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Estudiante> actualizar(@PathVariable Long id, @RequestBody Estudiante estudiante) {
+        Estudiante existente = estudianteService.getEstudianteById(id);
+        if (existente == null) {
+            return ResponseEntity.notFound().build();
+        }
+        existente.setNombre(estudiante.getNombre());
+        existente.setRun(estudiante.getRun());
+        existente.setCurso(estudiante.getCurso());
+        return ResponseEntity.ok(estudianteService.save(existente));
     }
 
     @DeleteMapping("/{id}")

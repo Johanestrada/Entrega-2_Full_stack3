@@ -3,6 +3,7 @@ import { AccountInfo, AuthenticationResult } from '@azure/msal-browser';
 import { MsalService } from '@azure/msal-angular';
 import { Observable } from 'rxjs';
 import { apiScope } from '../app.config';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -34,7 +35,7 @@ export class AuthService {
 
 	logout(): void {
 		if (this.getMicrosoftAccount()) {
-			void this.msal.logoutRedirect({ postLogoutRedirectUri: 'http://localhost:4173/login' });
+			void this.msal.logoutRedirect({ postLogoutRedirectUri: `${environment.redirectUri}/login` });
 		}
 	}
 }

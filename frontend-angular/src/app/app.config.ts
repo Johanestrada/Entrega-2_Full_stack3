@@ -15,16 +15,17 @@ import {
 } from '@azure/msal-angular';
 
 import { routes } from './app.routes';
+import { environment } from '../environments/environment';
 
-export const apiScope = 'api://e0d39aa2-d7b9-4ef5-9bef-84e418dcae72/api.access';
+export const apiScope = environment.apiScope;
 
 export function msalInstanceFactory(): PublicClientApplication {
   return new PublicClientApplication({
     auth: {
-      clientId: 'a43b07f8-2ca4-4985-b355-c62623fd8bc9',
-      authority: 'https://login.microsoftonline.com/39428fa5-d349-476e-8a21-6570cfd7fa42',
-      redirectUri: 'http://localhost:4173',
-      postLogoutRedirectUri: 'http://localhost:4173/login'
+      clientId: environment.clientId,
+      authority: `https://login.microsoftonline.com/${environment.tenantId}`,
+      redirectUri: environment.redirectUri,
+      postLogoutRedirectUri: `${environment.redirectUri}/login`
     },
     cache: {
       cacheLocation: 'sessionStorage'
@@ -38,7 +39,7 @@ export function msalGuardConfigFactory(): MsalGuardConfiguration {
 
 export function msalInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set('http://localhost:8084/**', [apiScope]);
+  protectedResourceMap.set(`${environment.apiBaseUrl}/**`, [apiScope]);
   return { interactionType: InteractionType.Redirect, protectedResourceMap };
 }
 

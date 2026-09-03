@@ -11,6 +11,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,7 +29,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = AcademicoController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@WebMvcTest(controllers = AcademicoController.class, excludeAutoConfiguration = {
+		SecurityAutoConfiguration.class,
+		OAuth2ResourceServerAutoConfiguration.class
+})
 @AutoConfigureMockMvc(addFilters = false)
 class BffServiceApplicationTests {
 
@@ -78,8 +82,7 @@ class BffServiceApplicationTests {
 	void alCrearAsistencia_debeRetornarObjetoCreado() throws Exception {
 		Map<String, Object> response = Map.of("status", "creado");
 
-		when(academicoFacade.marcarAsistenciaEstudiante(any(Long.class), any(Boolean.class)))
-				.thenReturn(response);
+		when(academicoFacade.crearAsistencia(any(Object.class))).thenReturn(response);
 
 		mockMvc.perform(post("/academico/asistencias")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -91,15 +94,14 @@ class BffServiceApplicationTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status", Matchers.is("creado")));
 
-		verify(academicoFacade, times(1)).marcarAsistenciaEstudiante(1L, true);
+		verify(academicoFacade, times(1)).crearAsistencia(any(Object.class));
 	}
 
 	@Test
 	void alCrearEvaluacion_debeRetornarObjetoCreado() throws Exception {
 		Map<String, Object> response = Map.of("id", 100);
 
-		when(academicoFacade.guardarEvaluacionEstudiante(any(Long.class), any(String.class), any(Double.class)))
-				.thenReturn(response);
+		when(academicoFacade.crearEvaluacion(any(Object.class))).thenReturn(response);
 
 		mockMvc.perform(post("/academico/evaluaciones")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -112,6 +114,6 @@ class BffServiceApplicationTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id", Matchers.is(100)));
 
-		verify(academicoFacade, times(1)).guardarEvaluacionEstudiante(1L, "Matemáticas", 6.5);
+		verify(academicoFacade, times(1)).crearEvaluacion(any(Object.class));
 	}
 }

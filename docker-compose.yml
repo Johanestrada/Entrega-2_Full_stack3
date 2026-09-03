@@ -9,7 +9,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - '3306:3306'
+      - '3307:3306'
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -88,7 +88,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend-angular
       args:
         VITE_BFF_URL: http://localhost:8084 # Esta URL es para el navegador del usuario
     ports:
@@ -102,3 +102,4 @@ volumes:
 networks:
   default:
     driver: bridge
+

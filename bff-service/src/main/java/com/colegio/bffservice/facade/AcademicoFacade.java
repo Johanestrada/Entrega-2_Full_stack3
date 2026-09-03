@@ -1,15 +1,18 @@
 package com.colegio.bffservice.facade;
 
-import com.colegio.bffservice.model.AcademicoDTO;
-import com.colegio.bffservice.dto.EstudianteDTO;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.colegio.bffservice.dto.EstudianteDTO;
+import com.colegio.bffservice.model.AcademicoDTO;
+
 import reactor.core.publisher.Mono;
-import java.util.List;
 
 @Component
 public class AcademicoFacade {
@@ -108,6 +111,12 @@ public class AcademicoFacade {
             .block();
     }
 
+    public Object crearAsistencia(Object asistencia) {
+        return webClientBuilder.build().post()
+            .uri(asistenciaServiceUrl + "/asistencias")
+            .bodyValue(asistencia).retrieve().bodyToMono(Object.class).block();
+    }
+
     public List<Object> marcarAsistenciaCurso(String curso, Boolean presente) {
         var estudiantes = webClientBuilder.build()
             .get()
@@ -140,6 +149,12 @@ public class AcademicoFacade {
             .retrieve()
             .bodyToMono(Object.class)
             .block();
+    }
+
+    public Object crearEvaluacion(Object evaluacion) {
+        return webClientBuilder.build().post()
+            .uri(evaluacionServiceUrl + "/evaluaciones")
+            .bodyValue(evaluacion).retrieve().bodyToMono(Object.class).block();
     }
 
     public Object actualizarEvaluacionEstudiante(Long evaluacionId, Double nota) {
@@ -213,5 +228,71 @@ public class AcademicoFacade {
             .retrieve()
             .bodyToMono(Void.class)
             .block();
+    }
+
+    public List<Object> listarEstudiantes() {
+        return webClientBuilder.build().get()
+            .uri(estudianteServiceUrl + "/estudiantes")
+            .retrieve().bodyToMono(List.class).block();
+    }
+
+    public Object obtenerEstudiante(Long id) {
+        return webClientBuilder.build().get()
+            .uri(estudianteServiceUrl + "/estudiantes/" + id)
+            .retrieve().bodyToMono(Object.class).block();
+    }
+
+    public Object actualizarEstudiante(Long id, Object estudiante) {
+        return webClientBuilder.build().put()
+            .uri(estudianteServiceUrl + "/estudiantes/" + id)
+            .bodyValue(estudiante).retrieve().bodyToMono(Object.class).block();
+    }
+
+    public List<Object> listarAsistencias() {
+        return webClientBuilder.build().get()
+            .uri(asistenciaServiceUrl + "/asistencias")
+            .retrieve().bodyToMono(List.class).block();
+    }
+
+    public Object obtenerAsistencia(Long id) {
+        return webClientBuilder.build().get()
+            .uri(asistenciaServiceUrl + "/asistencias/" + id)
+            .retrieve().bodyToMono(Object.class).block();
+    }
+
+    public List<Object> listarAsistenciasPorEstudiante(Long estudianteId) {
+        return webClientBuilder.build().get()
+            .uri(asistenciaServiceUrl + "/asistencias/estudiante/" + estudianteId)
+            .retrieve().bodyToMono(List.class).block();
+    }
+
+    public Object actualizarAsistencia(Long id, Object asistencia) {
+        return webClientBuilder.build().put()
+            .uri(asistenciaServiceUrl + "/asistencias/" + id)
+            .bodyValue(asistencia).retrieve().bodyToMono(Object.class).block();
+    }
+
+    public void eliminarAsistencia(Long id) {
+        webClientBuilder.build().delete()
+            .uri(asistenciaServiceUrl + "/asistencias/" + id)
+            .retrieve().bodyToMono(Void.class).block();
+    }
+
+    public List<Object> listarEvaluaciones() {
+        return webClientBuilder.build().get()
+            .uri(evaluacionServiceUrl + "/evaluaciones")
+            .retrieve().bodyToMono(List.class).block();
+    }
+
+    public Object obtenerEvaluacion(Long id) {
+        return webClientBuilder.build().get()
+            .uri(evaluacionServiceUrl + "/evaluaciones/" + id)
+            .retrieve().bodyToMono(Object.class).block();
+    }
+
+    public List<Object> listarEvaluacionesPorEstudiante(Long estudianteId) {
+        return webClientBuilder.build().get()
+            .uri(evaluacionServiceUrl + "/evaluaciones/estudiante/" + estudianteId)
+            .retrieve().bodyToMono(List.class).block();
     }
 }

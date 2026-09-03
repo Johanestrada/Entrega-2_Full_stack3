@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,41 +212,14 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
         assertTrue(status == 200 || status == 404, "Expected 200 OK or 404 Not Found but got " + status);
     }
 
-    /**
-     * Caso de negocio E2E: Autenticación y acceso a datos académicos
-     * 1. Registrarse como usuario
-     * 2. Hacer login
-     * 3. Acceder a datos académicos
-     */
     @Test
-    void e2e_AutenticacionYAccesoADatos() throws Exception {
-        // PASO 1: Registrarse
-        Map<String, Object> registro = new HashMap<>();
-        registro.put("username", "nuevoUsuario");
-        registro.put("password", "password123");
-
-        MvcResult resultRegister = mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registro)))
-                .andReturn();
-        int statusRegister = resultRegister.getResponse().getStatus();
-        assertTrue(statusRegister == 200 || statusRegister == 409, "Expected 200 OK or 409 Conflict but got " + statusRegister);
-        // Puede fallar si el usuario ya existe
-
-        // PASO 2: Login
-        Map<String, Object> login = new HashMap<>();
-        login.put("username", "admin");
-        login.put("password", "admin123");
+    void endpointsDeAutenticacionPropiaYaNoExisten() throws Exception {
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
 
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(login)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists());
-
-        // PASO 3: Acceder a datos académicos con token (simulado)
-        mockMvc.perform(get("/academico/curso/{curso}", "1-A")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 }

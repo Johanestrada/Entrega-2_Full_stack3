@@ -1,7 +1,6 @@
 package com.colegio.bffservice;
 
 import com.colegio.bffservice.facade.AcademicoFacade;
-import com.colegio.bffservice.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +29,6 @@ class BffSecurityTest {
 
     @MockBean
     private JwtDecoder jwtDecoder;
-
-    @MockBean
-    private JwtService jwtService;
 
     @BeforeEach
     void setUp() {

@@ -148,6 +148,8 @@ resource "aws_instance" "app" {
     issuer         = var.jwt_issuer_uri
     audience       = var.jwt_audience
     api_url        = aws_apigatewayv2_api.this.api_endpoint
+    image_prefix   = var.image_prefix
+    image_tag      = var.image_tag
   })
 }
 

@@ -11,6 +11,14 @@ variable "github_branch" {
 }
 variable "jwt_issuer_uri" { type = string }
 variable "jwt_audience" { type = string }
+variable "image_prefix" {
+  type    = string
+  default = "ghcr.io/Johanestrada/Entrega-2_Full_stack3-"
+}
+variable "image_tag" {
+  type    = string
+  default = "latest"
+}
 variable "mysql_admin_password" {
   type      = string
   sensitive = true

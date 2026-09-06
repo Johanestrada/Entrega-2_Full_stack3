@@ -6,3 +6,8 @@ frontend/dist/
 .env
 .env.*
 !.env.example
+infrastructure/**/.terraform/
+infrastructure/**/*.tfstate
+infrastructure/**/*.tfstate.*
+infrastructure/**/*.tfvars
+!infrastructure/**/terraform.tfvars.example

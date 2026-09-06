@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euxo pipefail
+dnf update -y
+dnf install -y git docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+curl -L https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+git clone --branch ${branch} ${repository_url} /opt/colegio
+cd /opt/colegio
+cat > .env <<EOF
+MYSQL_ROOT_PASSWORD=unused
+MYSQL_DATABASE=colegio
+MYSQL_USER=${db_user}
+MYSQL_PASSWORD=${db_password}
+SPRING_DATASOURCE_URL=jdbc:mysql://${db_host}:3306/colegio?useSSL=true&serverTimezone=UTC
+SPRING_DATASOURCE_USERNAME=${db_user}
+SPRING_DATASOURCE_PASSWORD=${db_password}
+SPRING_JPA_HIBERNATE_DDL_AUTO=update
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+EUREKA_URL=http://eureka-server:8761/eureka
+ESTUDIANTE_SERVICE_URL=http://estudiante-service:8081
+ASISTENCIA_SERVICE_URL=http://asistencia-service:8082
+EVALUACION_SERVICE_URL=http://evaluacion-service:8083
+JWT_ISSUER_URI=${issuer}
+JWT_AUDIENCE=${audience}
+CORS_ALLOWED_ORIGINS=http://$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
+API_BASE_URL=${api_url}
+EOF
+docker compose up -d --build

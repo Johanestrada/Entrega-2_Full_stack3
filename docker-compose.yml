@@ -1,19 +1,4 @@
 services:
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - '3307:3306'
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - default
   eureka-server:
     build: ./eureka-server
     ports:
@@ -25,7 +10,6 @@ services:
       - '8081:8081'
     depends_on:
       - eureka-server
-      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
@@ -40,7 +24,6 @@ services:
       - '8082:8082'
     depends_on:
       - eureka-server
-      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
@@ -55,7 +38,6 @@ services:
       - '8083:8083'
     depends_on:
       - eureka-server
-      - mysql
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
@@ -73,7 +55,6 @@ services:
       - estudiante-service
       - asistencia-service
       - evaluacion-service
-      - mysql
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
@@ -85,20 +66,19 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
-        - JWT_ISSUER_URI=${JWT_ISSUER_URI}
-        - JWT_AUDIENCE=${JWT_AUDIENCE}
-        - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - JWT_ISSUER_URI=${JWT_ISSUER_URI}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
 
   frontend:
     build:
       context: ./frontend-angular
     ports:
-      - '4173:4173'
+      - '80:80'
+    environment:
+      - API_BASE_URL=${API_BASE_URL}
     depends_on:
       - bff-service
-
-volumes:
-  mysql_data:
 
 networks:
   default:

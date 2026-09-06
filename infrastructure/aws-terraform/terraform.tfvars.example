@@ -1,0 +1,9 @@
+aws_region = "us-east-1"
+project    = "colegiojp2026"
+environment = "dev"
+
+github_repository_url = "https://github.com/TU_USUARIO/TU_REPOSITORIO.git"
+github_branch         = "main"
+
+jwt_issuer_uri = "https://login.microsoftonline.com/2b19a7f0-3812-4fba-b561-52eca3bdd992/v2.0"
+jwt_audience   = "api://ef2b9500-20d4-4ad8-9c4d-a1ea41344c6b"

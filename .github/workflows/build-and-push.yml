@@ -22,6 +22,7 @@ jobs:
         id: meta
         shell: bash
         run: |
+          echo "repo_slug=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "branch_tag=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
           echo "sha_tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
 
@@ -38,9 +39,9 @@ jobs:
           context: ./eureka-server
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-eureka-server:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-eureka-server:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-eureka-server:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-eureka-server:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-eureka-server:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-eureka-server:latest
 
       - name: Build and push estudiante-service
         uses: docker/build-push-action@v4
@@ -48,9 +49,9 @@ jobs:
           context: ./estudiante-service
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-estudiante-service:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-estudiante-service:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-estudiante-service:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-estudiante-service:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-estudiante-service:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-estudiante-service:latest
 
       - name: Build and push asistencia-service
         uses: docker/build-push-action@v4
@@ -58,9 +59,9 @@ jobs:
           context: ./asistencia-service
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-asistencia-service:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-asistencia-service:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-asistencia-service:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-asistencia-service:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-asistencia-service:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-asistencia-service:latest
 
       - name: Build and push evaluacion-service
         uses: docker/build-push-action@v4
@@ -68,9 +69,9 @@ jobs:
           context: ./evaluacion-service
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-evaluacion-service:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-evaluacion-service:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-evaluacion-service:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-evaluacion-service:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-evaluacion-service:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-evaluacion-service:latest
 
       - name: Build and push bff-service
         uses: docker/build-push-action@v4
@@ -78,9 +79,9 @@ jobs:
           context: ./bff-service
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-bff-service:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-bff-service:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-bff-service:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-bff-service:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-bff-service:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-bff-service:latest
 
       - name: Build and push frontend
         uses: docker/build-push-action@v4
@@ -88,6 +89,6 @@ jobs:
           context: ./frontend-angular
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-frontend:${{ steps.meta.outputs.branch_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-frontend:${{ steps.meta.outputs.sha_tag }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-frontend:latest
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-frontend:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-frontend:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-frontend:latest

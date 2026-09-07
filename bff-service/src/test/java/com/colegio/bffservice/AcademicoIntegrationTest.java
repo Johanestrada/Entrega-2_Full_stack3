@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,10 +29,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "spring.cloud.enabled=false",
         "estudiante.service.url=http://localhost:8081",
         "asistencia.service.url=http://localhost:8081",
-        "evaluacion.service.url=http://localhost:8081"
+        "evaluacion.service.url=http://localhost:8081",
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://login.microsoftonline.com/39428fa5-d349-476e-8a21-6570cfd7fa42/v2.0",
+        "spring.security.oauth2.resourceserver.jwt.audience=e0d39aa2-d7b9-4ef5-9bef-84e418dcae72"
 })
-@AutoConfigureMockMvc(addFilters = false)
+    @AutoConfigureMockMvc
 class AcademicoIntegrationTest extends AbstractMockWebServerTest {
+
+        @MockBean
+        private JwtDecoder jwtDecoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,7 +54,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
         Long estudianteId = 1L;
 
         mockMvc.perform(get("/academico/{estudianteId}", estudianteId)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .with(entraAccessToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estudiante", notNullValue()));
     }
@@ -60,7 +68,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/asistencias")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
+            .content(objectMapper.writeValueAsString(body))
+            .with(entraAccessToken()))
                 .andExpect(status().isOk());
     }
 
@@ -73,7 +82,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/evaluaciones")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
+            .content(objectMapper.writeValueAsString(body))
+            .with(entraAccessToken()))
                 .andExpect(status().isOk());
     }
 
@@ -82,7 +92,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
         String curso = "1-A";
 
         mockMvc.perform(get("/academico/curso/{curso}", curso)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .with(entraAccessToken()))
                 .andExpect(status().isOk());
     }
 
@@ -91,7 +102,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
         String run = "20.111.222-3";
 
         MvcResult result = mockMvc.perform(get("/academico/run/{run}", run)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(entraAccessToken()))
                 .andReturn();
 
         int status = result.getResponse().getStatus();
@@ -106,7 +118,8 @@ class AcademicoIntegrationTest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/curso/{curso}/asistencia", curso)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
+            .content(objectMapper.writeValueAsString(body))
+            .with(entraAccessToken()))
                 .andExpect(status().isOk());
     }
 }

@@ -1,17 +1,24 @@
 package com.colegio.bffservice;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.io.IOException;
 
 @ActiveProfiles("test")
 public abstract class AbstractMockWebServerTest {
+
+    protected RequestPostProcessor entraAccessToken() {
+        return jwt().authorities(() -> "SCOPE_api.access");
+    }
 
     protected MockWebServer mockWebServer;
 

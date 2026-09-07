@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -31,10 +33,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "spring.cloud.enabled=false",
         "estudiante.service.url=http://localhost:8081",
         "asistencia.service.url=http://localhost:8081",
-        "evaluacion.service.url=http://localhost:8081"
+        "evaluacion.service.url=http://localhost:8081",
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://login.microsoftonline.com/39428fa5-d349-476e-8a21-6570cfd7fa42/v2.0",
+        "spring.security.oauth2.resourceserver.jwt.audience=e0d39aa2-d7b9-4ef5-9bef-84e418dcae72"
 })
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 class AcademicoE2ETest extends AbstractMockWebServerTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,12 +65,14 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/estudiantes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(nuevoEstudiante)))
+                .content(objectMapper.writeValueAsString(nuevoEstudiante))
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
 
         // PASO 2: Obtener datos del estudiante (debería estar registrado)
         MvcResult result = mockMvc.perform(get("/academico/run/{run}", "22.333.444-5")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(entraAccessToken()))
                 .andReturn();
         int status = result.getResponse().getStatus();
         assertTrue(status == 200 || status == 404, "Expected 200 OK or 404 Not Found but got " + status);
@@ -82,7 +91,8 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         // PASO 1: Obtener estudiantes del curso
         mockMvc.perform(get("/academico/curso/{curso}", curso)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
 
         // PASO 2: Registrar asistencia para todo el curso
@@ -91,7 +101,8 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/curso/{curso}/asistencia", curso)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(asistenciaBody)))
+                .content(objectMapper.writeValueAsString(asistenciaBody))
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
     }
 
@@ -113,7 +124,8 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/evaluaciones")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(evaluacion)))
+                .content(objectMapper.writeValueAsString(evaluacion))
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
 
         // PASO 2: Actualizar nota (si obtenemos el ID de la evaluación)
@@ -123,7 +135,8 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         MvcResult result = mockMvc.perform(put("/academico/evaluaciones/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(actualizacion)))
+                        .content(objectMapper.writeValueAsString(actualizacion))
+                        .with(entraAccessToken()))
                 .andReturn();
         int status = result.getResponse().getStatus();
         assertTrue(status == 200 || status == 404, "Expected 200 OK or 404 Not Found but got " + status);
@@ -142,7 +155,8 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         // PASO 1: Obtener datos académicos completos
         MvcResult result = mockMvc.perform(get("/academico/{estudianteId}", estudianteId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(entraAccessToken()))
                 .andReturn();
         int status = result.getResponse().getStatus();
         assertTrue(status == 200 || status == 404, "Expected 200 OK or 404 Not Found but got " + status);
@@ -167,18 +181,21 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/estudiantes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(nuevoEstudiante)))
+                .content(objectMapper.writeValueAsString(nuevoEstudiante))
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
 
         // PASO 2: Leer datos del estudiante
         MvcResult resultRead = mockMvc.perform(get("/academico/{estudianteId}", estudianteId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(entraAccessToken()))
                 .andReturn();
         int statusRead = resultRead.getResponse().getStatus();
         assertTrue(statusRead == 200 || statusRead == 404, "Expected 200 OK or 404 Not Found but got " + statusRead);
 
         // PASO 3: Eliminar estudiante
-        MvcResult resultDelete = mockMvc.perform(delete("/academico/estudiantes/{id}", estudianteId))
+        MvcResult resultDelete = mockMvc.perform(delete("/academico/estudiantes/{id}", estudianteId)
+                .with(entraAccessToken()))
                 .andReturn();
         int statusDelete = resultDelete.getResponse().getStatus();
         assertTrue(statusDelete == 204 || statusDelete == 404, "Expected 204 No Content or 404 Not Found but got " + statusDelete);
@@ -201,12 +218,14 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
 
         mockMvc.perform(post("/academico/asistencias")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(asistencia)))
+                .content(objectMapper.writeValueAsString(asistencia))
+                .with(entraAccessToken()))
                 .andExpect(status().isOk());
 
         // PASO 2: Obtener datos académicos (debería incluir la nueva asistencia)
         MvcResult result = mockMvc.perform(get("/academico/{estudianteId}", estudianteId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(entraAccessToken()))
                 .andReturn();
         int status = result.getResponse().getStatus();
         assertTrue(status == 200 || status == 404, "Expected 200 OK or 404 Not Found but got " + status);
@@ -215,11 +234,13 @@ class AcademicoE2ETest extends AbstractMockWebServerTest {
     @Test
     void endpointsDeAutenticacionPropiaYaNoExisten() throws Exception {
         mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(entraAccessToken()))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(entraAccessToken()))
                 .andExpect(status().isNotFound());
     }
 }

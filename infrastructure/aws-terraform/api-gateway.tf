@@ -1,6 +1,13 @@
 resource "aws_apigatewayv2_api" "this" {
   name          = "${local.name}-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_headers     = ["Authorization", "Content-Type"]
+    allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_origins     = split(",", var.cors_allowed_origins)
+    allow_credentials = false
+  }
 }
 
 resource "aws_apigatewayv2_authorizer" "entra" {
@@ -19,8 +26,10 @@ resource "aws_apigatewayv2_integration" "bff" {
   api_id                 = aws_apigatewayv2_api.this.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "ANY"
-  integration_uri        = "http://${aws_instance.app.public_dns}:8084/{proxy}"
+  integration_uri        = aws_lb_listener.bff.arn
   payload_format_version = "1.0"
+  connection_type        = "VPC_LINK"
+  connection_id          = aws_apigatewayv2_vpc_link.this.id
 }
 
 resource "aws_apigatewayv2_route" "bff" {

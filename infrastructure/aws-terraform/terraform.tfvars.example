@@ -1,0 +1,20 @@
+aws_region = "us-east-1"
+project = "colegiojp2026"
+environment = "dev"
+github_repository_url = "https://github.com/USUARIO/REPOSITORIO.git"
+github_branch = "main"
+
+jwt_issuer_uri = "https://login.microsoftonline.com/39428fa5-d349-476e-8a21-6570cfd7fa42/v2.0"
+jwt_audience = "e0d39aa2-d7b9-4ef5-9bef-84e418dcae72"
+cors_allowed_origins = "http://EC2_PUBLIC_DNS"
+
+mysql_admin_login = "colegioadmin"
+mysql_admin_password = "CAMBIAR_ESTO"
+
+# SSH no se habilita por defecto; conservar vacio salvo que se agregue una regla restringida.
+admin_cidr = ""
+
+# Vacio: Compose intentara pull y luego construira localmente si no hay imagen publicada.
+image_prefix = ""
+image_tag = "latest"
+instance_type = "t3.medium"

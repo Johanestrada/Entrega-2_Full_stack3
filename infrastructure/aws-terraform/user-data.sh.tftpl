@@ -1,5 +1,6 @@
 #!/bin/bash
-set -euxo pipefail
+set -euo pipefail
+exec > >(tee /var/log/colegio-user-data.log | logger -t colegio-user-data -s 2>/dev/console) 2>&1
 dnf update -y
 dnf install -y git docker
 systemctl enable --now docker
@@ -24,11 +25,14 @@ ASISTENCIA_SERVICE_URL=http://asistencia-service:8082
 EVALUACION_SERVICE_URL=http://evaluacion-service:8083
 JWT_ISSUER_URI=${issuer}
 JWT_AUDIENCE=${audience}
-CORS_ALLOWED_ORIGINS=http://$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
+CORS_ALLOWED_ORIGINS=${cors_origins}
 API_BASE_URL=${api_url}
 IMAGE_PREFIX=${image_prefix}
 IMAGE_TAG=${image_tag}
 EOF
-# Prefer pulling pre-built images for faster startup. If pull fails, fall back to build.
-docker compose pull || true
+# Use published images when available; otherwise build from the cloned repository.
+if ! docker compose pull; then
+	echo "No se pudieron descargar todas las imagenes; se intentara construir localmente."
+	docker compose build
+fi
 docker compose up -d

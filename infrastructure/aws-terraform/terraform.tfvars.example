@@ -6,7 +6,11 @@ github_branch = "main"
 
 jwt_issuer_uri = "https://login.microsoftonline.com/39428fa5-d349-476e-8a21-6570cfd7fa42/v2.0"
 jwt_audience = "e0d39aa2-d7b9-4ef5-9bef-84e418dcae72"
-cors_allowed_origins = "http://EC2_PUBLIC_DNS"
+entra_tenant_id = "39428fa5-d349-476e-8a21-6570cfd7fa42"
+frontend_client_id = "a43b07f8-2ca4-4985-b355-c62623fd8bc9"
+frontend_api_scope = "api://e0d39aa2-d7b9-4ef5-9bef-84e418dcae72/api.access"
+cors_allowed_origins = "auto"
+enable_cloudfront = false
 
 mysql_admin_login = "colegioadmin"
 mysql_admin_password = "CAMBIAR_ESTO"
@@ -18,3 +22,15 @@ admin_cidr = ""
 image_prefix = ""
 image_tag = "latest"
 instance_type = "t3.medium"
+
+existing_vpc_id = "vpc-0768ae36f7796f2bf"
+existing_public_subnet_ids = [
+	"subnet-0d58dc56351d27484",
+	"subnet-071ccea4cb383d993",
+]
+existing_alb_name = "colegiojp2026-dev-alb"
+existing_target_group_name = "colegiojp2026-dev-bff"
+existing_rds_identifier = "colegiojp2026-dev-mysql"
+existing_ec2_security_group_id = "sg-005862698adab9f05"
+existing_vpc_link_security_group_id = "sg-0a83d8bd0a88fe1d2"
+vpc_link_name = "colegiojp2026-dev-vpc-link-reused"

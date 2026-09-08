@@ -80,7 +80,7 @@ services:
     build:
       context: ./frontend-angular
     ports:
-      - '80:80'
+      - '4173:80'
     environment:
       - API_BASE_URL=${API_BASE_URL}
     depends_on:

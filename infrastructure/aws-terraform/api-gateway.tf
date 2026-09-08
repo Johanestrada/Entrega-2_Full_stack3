@@ -5,7 +5,7 @@ resource "aws_apigatewayv2_api" "this" {
   cors_configuration {
     allow_headers     = ["Authorization", "Content-Type"]
     allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    allow_origins     = split(",", var.cors_allowed_origins)
+    allow_origins     = var.cors_allowed_origins == "auto" ? ["*"] : split(",", var.cors_allowed_origins)
     allow_credentials = false
   }
 }
@@ -32,13 +32,46 @@ resource "aws_apigatewayv2_integration" "bff" {
   connection_id          = aws_apigatewayv2_vpc_link.this.id
 }
 
+resource "aws_apigatewayv2_integration" "frontend" {
+  api_id              = aws_apigatewayv2_api.this.id
+  integration_type    = "HTTP_PROXY"
+  integration_method  = "ANY"
+  integration_uri     = "http://${aws_instance.app.public_dns}"
+  request_parameters = {
+    "overwrite:path" = "$request.path"
+  }
+}
+
 resource "aws_apigatewayv2_route" "bff" {
   api_id               = aws_apigatewayv2_api.this.id
-  route_key            = "ANY /{proxy+}"
+  route_key            = "ANY /academico/{proxy+}"
   target               = "integrations/${aws_apigatewayv2_integration.bff.id}"
   authorization_type   = "JWT"
   authorizer_id        = aws_apigatewayv2_authorizer.entra.id
   authorization_scopes = ["api.access"]
+}
+
+resource "aws_apigatewayv2_route" "bff_root" {
+  api_id               = aws_apigatewayv2_api.this.id
+  route_key            = "ANY /academico"
+  target               = "integrations/${aws_apigatewayv2_integration.bff.id}"
+  authorization_type   = "JWT"
+  authorizer_id        = aws_apigatewayv2_authorizer.entra.id
+  authorization_scopes = ["api.access"]
+}
+
+resource "aws_apigatewayv2_route" "frontend_root" {
+  api_id             = aws_apigatewayv2_api.this.id
+  route_key          = "ANY /"
+  target             = "integrations/${aws_apigatewayv2_integration.frontend.id}"
+  authorization_type = "NONE"
+}
+
+resource "aws_apigatewayv2_route" "frontend" {
+  api_id             = aws_apigatewayv2_api.this.id
+  route_key          = "ANY /{proxy+}"
+  target             = "integrations/${aws_apigatewayv2_integration.frontend.id}"
+  authorization_type = "NONE"
 }
 
 resource "aws_apigatewayv2_stage" "default" {

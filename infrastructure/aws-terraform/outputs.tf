@@ -4,7 +4,12 @@ output "dns_publico_ec2" {
 }
 
 output "url_frontend" {
-  description = "URL temporal del frontend servido por la EC2."
+  description = "URL HTTPS principal del frontend servido mediante API Gateway."
+  value       = var.enable_cloudfront ? "https://${aws_cloudfront_distribution.frontend[0].domain_name}" : aws_apigatewayv2_api.this.api_endpoint
+}
+
+output "url_frontend_ec2" {
+  description = "URL HTTP directa de diagnóstico de la EC2."
   value       = "http://${aws_instance.app.public_dns}"
 }
 
@@ -15,7 +20,7 @@ output "endpoint_api_gateway" {
 
 output "dns_alb_interno" {
   description = "DNS interno del Application Load Balancer."
-  value       = aws_lb.this.dns_name
+  value       = aws_lb.bff.dns_name
 }
 
 output "id_vpc_link" {

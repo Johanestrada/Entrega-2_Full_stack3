@@ -5,4 +5,6 @@ locals {
     Environment = var.environment
     ManagedBy   = "Terraform"
   }
+
+  existing_public_subnets = var.existing_public_subnet_ids
 }

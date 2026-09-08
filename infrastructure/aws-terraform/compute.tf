@@ -1,9 +1,16 @@
 resource "aws_instance" "app" {
+  depends_on = [aws_route.public_internet]
+
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.public[0].id
+  subnet_id                   = var.existing_public_subnet_ids[0]
   vpc_security_group_ids      = [aws_security_group.ec2.id]
   associate_public_ip_address = true
+  user_data_replace_on_change = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     repository_url = var.github_repository_url
@@ -13,8 +20,11 @@ resource "aws_instance" "app" {
     db_password    = var.mysql_admin_password
     issuer         = var.jwt_issuer_uri
     audience       = var.jwt_audience
+    entra_tenant   = var.entra_tenant_id
+    client_id      = var.frontend_client_id
+    api_scope      = var.frontend_api_scope
     api_url        = aws_apigatewayv2_api.this.api_endpoint
-    cors_origins   = var.cors_allowed_origins
+    cors_origins   = var.cors_allowed_origins == "auto" ? aws_apigatewayv2_api.this.api_endpoint : var.cors_allowed_origins
     image_prefix   = var.image_prefix
     image_tag      = var.image_tag
   })

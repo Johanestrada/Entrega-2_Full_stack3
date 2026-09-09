@@ -1,6 +1,6 @@
 resource "aws_db_subnet_group" "mysql" {
   name       = "${local.name}-mysql-subnets"
-  subnet_ids = var.existing_public_subnet_ids
+  subnet_ids = local.public_subnet_ids
 }
 
 resource "aws_db_instance" "mysql" {

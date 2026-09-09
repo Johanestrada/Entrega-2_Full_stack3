@@ -3,7 +3,7 @@ resource "aws_lb" "bff" {
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = var.existing_public_subnet_ids
+  subnets            = local.public_subnet_ids
 }
 
 resource "aws_lb_listener" "bff" {
@@ -25,6 +25,6 @@ resource "aws_lb_target_group_attachment" "bff" {
 
 resource "aws_apigatewayv2_vpc_link" "this" {
   name               = var.vpc_link_name
-  security_group_ids = [aws_security_group.vpc_link.id]
-  subnet_ids         = var.existing_public_subnet_ids
+  security_group_ids = [local.vpc_link_security_group_id]
+  subnet_ids         = local.public_subnet_ids
 }

@@ -1,7 +1,8 @@
 resource "aws_security_group" "vpc_link" {
+  count       = var.existing_vpc_link_security_group_id == "" ? 1 : 0
   name        = "${local.name}-vpc-link"
   description = "Security group for API Gateway VPC Link"
-  vpc_id      = var.existing_vpc_id
+  vpc_id      = local.vpc_id
 
   egress {
     protocol    = "-1"
@@ -14,13 +15,13 @@ resource "aws_security_group" "vpc_link" {
 resource "aws_security_group" "alb" {
   name        = "${local.name}-alb"
   description = "Security group for internal BFF ALB"
-  vpc_id      = var.existing_vpc_id
+  vpc_id      = local.vpc_id
 
   ingress {
     protocol        = "tcp"
     from_port       = 80
     to_port         = 80
-    security_groups = [aws_security_group.vpc_link.id]
+    security_groups = [local.vpc_link_security_group_id]
   }
 
   egress {
@@ -32,9 +33,10 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_security_group" "ec2" {
+  count       = var.existing_ec2_security_group_id == "" ? 1 : 0
   name        = "${local.name}-ec2"
   description = "Security group for frontend and BFF EC2"
-  vpc_id      = var.existing_vpc_id
+  vpc_id      = local.vpc_id
 
   ingress {
     protocol    = "tcp"
@@ -72,13 +74,13 @@ resource "aws_security_group" "ec2" {
 resource "aws_security_group" "rds" {
   name        = "${local.name}-rds"
   description = "Security group for MySQL RDS"
-  vpc_id      = var.existing_vpc_id
+  vpc_id      = local.vpc_id
 
   ingress {
     protocol        = "tcp"
     from_port       = 3306
     to_port         = 3306
-    security_groups = [aws_security_group.ec2.id]
+    security_groups = [local.ec2_security_group_id]
   }
 
   egress {

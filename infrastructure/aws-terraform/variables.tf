@@ -67,12 +67,14 @@ variable "instance_type" {
 
 variable "existing_vpc_id" {
   type        = string
-  description = "VPC existente que se reutilizara para todo el despliegue."
+  description = "VPC existente que se reutilizara para todo el despliegue. Si se deja vacío, se usa la VPC por defecto o se crea una nueva."
+  default     = ""
 }
 
 variable "existing_public_subnet_ids" {
   type        = list(string)
-  description = "Subredes publicas existentes para EC2 y VPC Link."
+  description = "Subredes publicas existentes para EC2 y VPC Link. Si se dejan vacías, se usan las subredes de la VPC por defecto o se crean nuevas."
+  default     = []
 }
 
 variable "existing_alb_name" {
@@ -92,12 +94,14 @@ variable "existing_rds_identifier" {
 
 variable "existing_ec2_security_group_id" {
   type        = string
-  description = "Security Group existente para la instancia EC2."
+  description = "Security Group existente para la instancia EC2. Dejar vacío para crear uno nuevo."
+  default     = ""
 }
 
 variable "existing_vpc_link_security_group_id" {
   type        = string
-  description = "Security Group existente para el VPC Link."
+  description = "Security Group existente para el VPC Link. Dejar vacío para crear uno nuevo."
+  default     = ""
 }
 
 variable "vpc_link_name" {

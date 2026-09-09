@@ -24,8 +24,14 @@ data "aws_subnets" "default" {
     name   = "vpc-id"
     values = [local.vpc_id]
   }
+  
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1f"]
+  }
 }
 
 data "aws_lb_target_group" "existing" {
-  name = var.existing_target_group_name
+  count = var.existing_target_group_name != "" ? 1 : 0
+  name  = var.existing_target_group_name
 }

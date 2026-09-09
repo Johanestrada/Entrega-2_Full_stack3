@@ -36,7 +36,7 @@ resource "aws_apigatewayv2_integration" "frontend" {
   api_id              = aws_apigatewayv2_api.this.id
   integration_type    = "HTTP_PROXY"
   integration_method  = "ANY"
-  integration_uri     = "http://${aws_instance.app.public_dns}"
+  integration_uri     = "http://${aws_instance.app.public_dns}:4173"
   request_parameters = {
     "overwrite:path" = "$request.path"
   }

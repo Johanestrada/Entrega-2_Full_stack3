@@ -17,6 +17,7 @@ locals {
 
   vpc_link_security_group_id = var.existing_vpc_link_security_group_id != "" ? var.existing_vpc_link_security_group_id : aws_security_group.vpc_link[0].id
   ec2_security_group_id      = var.existing_ec2_security_group_id != "" ? var.existing_ec2_security_group_id : aws_security_group.ec2[0].id
+  rds_security_group_id      = var.existing_rds_security_group_id != "" ? var.existing_rds_security_group_id : aws_security_group.rds[0].id
 
   tags = {
     Project     = var.project

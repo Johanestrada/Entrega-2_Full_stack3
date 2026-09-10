@@ -1,4 +1,5 @@
 #!/bin/bash
+# Rebuild the application from a clean EC2 volume.
 set -euo pipefail
 exec > >(tee /var/log/colegio-user-data.log | logger -t colegio-user-data -s 2>/dev/console) 2>&1
 dnf update -y
@@ -72,10 +73,17 @@ image_prefix_value="${image_prefix}"
 if [ -n "$image_prefix_value" ]; then
 	if ! docker compose pull; then
 		echo "No se pudieron descargar todas las imagenes; se construiran localmente."
-		docker compose build
+		docker compose build frontend
 	fi
 else
 	echo "IMAGE_PREFIX vacio; se construiran las imagenes localmente."
-	docker compose build
+	# Publish the UI first so a slow or failing backend build does not leave a blank site.
+	docker compose build frontend
 fi
-docker compose up -d
+docker compose up -d --no-deps frontend
+
+if docker compose build; then
+	docker compose up -d
+else
+	echo "El frontend quedo disponible, pero uno o mas servicios backend no pudieron compilarse."
+fi

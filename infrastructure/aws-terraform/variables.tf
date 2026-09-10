@@ -98,6 +98,12 @@ variable "existing_ec2_security_group_id" {
   default     = ""
 }
 
+variable "existing_rds_security_group_id" {
+  type        = string
+  description = "Security Group existente para RDS. Dejar vacío para crear uno nuevo."
+  default     = ""
+}
+
 variable "existing_vpc_link_security_group_id" {
   type        = string
   description = "Security Group existente para el VPC Link. Dejar vacío para crear uno nuevo."

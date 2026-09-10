@@ -79,6 +79,7 @@ resource "aws_security_group" "ec2" {
 }
 
 resource "aws_security_group" "rds" {
+  count       = var.existing_rds_security_group_id == "" ? 1 : 0
   name        = "${local.name}-rds"
   description = "Security group for MySQL RDS"
   vpc_id      = local.vpc_id

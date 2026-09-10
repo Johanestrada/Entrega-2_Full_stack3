@@ -13,7 +13,7 @@ resource "aws_db_instance" "mysql" {
   username                = var.mysql_admin_login
   password                = var.mysql_admin_password
   db_subnet_group_name    = aws_db_subnet_group.mysql.name
-  vpc_security_group_ids  = [aws_security_group.rds.id]
+  vpc_security_group_ids  = [local.rds_security_group_id]
   publicly_accessible     = false
   skip_final_snapshot     = true
   deletion_protection     = false

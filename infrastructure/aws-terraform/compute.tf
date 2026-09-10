@@ -18,7 +18,7 @@ resource "aws_instance" "app" {
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     repository_url = var.github_repository_url
     branch         = var.github_branch
-    db_host        = aws_db_instance.mysql.address
+    db_host        = local.rds_address
     db_user        = var.mysql_admin_login
     db_password    = var.mysql_admin_password
     issuer         = var.jwt_issuer_uri

@@ -20,20 +20,20 @@ output "endpoint_api_gateway" {
 
 output "dns_alb_interno" {
   description = "DNS interno del Application Load Balancer."
-  value       = aws_lb.bff.dns_name
+  value       = data.external.discovery.result.alb_exists == "true" ? data.aws_lb.existing[0].dns_name : aws_lb.bff[0].dns_name
 }
 
 output "id_vpc_link" {
   description = "ID del VPC Link usado por API Gateway."
-  value       = aws_apigatewayv2_vpc_link.this.id
+  value       = local.vpc_link_id
 }
 
 output "arn_vpc_link" {
   description = "ARN del VPC Link usado por API Gateway."
-  value       = aws_apigatewayv2_vpc_link.this.arn
+  value       = data.external.discovery.result.vpc_link_exists == "true" ? data.aws_apigatewayv2_vpc_link.existing[0].arn : aws_apigatewayv2_vpc_link.this[0].arn
 }
 
 output "endpoint_rds" {
   description = "Endpoint privado de RDS MySQL."
-  value       = aws_db_instance.mysql.address
+  value       = local.rds_address
 }

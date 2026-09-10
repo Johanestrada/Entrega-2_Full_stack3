@@ -29,14 +29,14 @@ resource "aws_apigatewayv2_integration" "bff" {
   integration_uri        = aws_lb_listener.bff.arn
   payload_format_version = "1.0"
   connection_type        = "VPC_LINK"
-  connection_id          = aws_apigatewayv2_vpc_link.this.id
+  connection_id          = local.vpc_link_id
 }
 
 resource "aws_apigatewayv2_integration" "frontend" {
-  api_id              = aws_apigatewayv2_api.this.id
-  integration_type    = "HTTP_PROXY"
-  integration_method  = "ANY"
-  integration_uri     = "http://${aws_instance.app.public_dns}:4173"
+  api_id             = aws_apigatewayv2_api.this.id
+  integration_type   = "HTTP_PROXY"
+  integration_method = "ANY"
+  integration_uri    = "http://${aws_instance.app.public_dns}:4173"
   request_parameters = {
     "overwrite:path" = "$request.path"
   }

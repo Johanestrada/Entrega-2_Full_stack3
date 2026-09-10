@@ -4,6 +4,7 @@ resource "aws_db_subnet_group" "mysql" {
 }
 
 resource "aws_db_instance" "mysql" {
+  count                   = data.external.discovery.result.rds_exists == "true" ? 0 : 1
   identifier              = var.existing_rds_identifier
   allocated_storage       = 20
   db_name                 = "colegio"

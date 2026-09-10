@@ -1,5 +1,5 @@
 resource "aws_security_group" "vpc_link" {
-  count       = var.existing_vpc_link_security_group_id == "" ? 1 : 0
+  count       = var.existing_vpc_link_security_group_id == "" && data.external.discovery.result.vpc_link_security_group_exists != "true" ? 1 : 0
   name        = "${local.name}-vpc-link"
   description = "Security group for API Gateway VPC Link"
   vpc_id      = local.vpc_id
@@ -13,6 +13,7 @@ resource "aws_security_group" "vpc_link" {
 }
 
 resource "aws_security_group" "alb" {
+  count       = data.external.discovery.result.alb_exists == "true" ? 0 : 1
   name        = "${local.name}-alb"
   description = "Security group for internal BFF ALB"
   vpc_id      = local.vpc_id
@@ -56,7 +57,7 @@ resource "aws_security_group" "ec2" {
     protocol        = "tcp"
     from_port       = 8084
     to_port         = 8084
-    security_groups = [aws_security_group.alb.id]
+    security_groups = [local.alb_security_group_id]
   }
 
   dynamic "ingress" {
@@ -79,7 +80,7 @@ resource "aws_security_group" "ec2" {
 }
 
 resource "aws_security_group" "rds" {
-  count       = var.existing_rds_security_group_id == "" ? 1 : 0
+  count       = var.existing_rds_security_group_id == "" && data.external.discovery.result.rds_security_group_exists != "true" ? 1 : 0
   name        = "${local.name}-rds"
   description = "Security group for MySQL RDS"
   vpc_id      = local.vpc_id

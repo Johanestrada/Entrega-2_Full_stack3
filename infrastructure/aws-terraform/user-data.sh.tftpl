@@ -70,18 +70,18 @@ IMAGE_TAG=${image_tag}
 EOF
 cat > docker-compose.override.yml <<'COMPOSE_OVERRIDE'
 services:
-	eureka-server:
-		restart: unless-stopped
-	estudiante-service:
-		restart: unless-stopped
-	asistencia-service:
-		restart: unless-stopped
-	evaluacion-service:
-		restart: unless-stopped
-	bff-service:
-		restart: unless-stopped
-	frontend:
-		restart: unless-stopped
+  eureka-server:
+    restart: unless-stopped
+  estudiante-service:
+    restart: unless-stopped
+  asistencia-service:
+    restart: unless-stopped
+  evaluacion-service:
+    restart: unless-stopped
+  bff-service:
+    restart: unless-stopped
+  frontend:
+    restart: unless-stopped
 COMPOSE_OVERRIDE
 # Use published images when configured; otherwise build from the cloned repository.
 image_prefix_value="${image_prefix}"

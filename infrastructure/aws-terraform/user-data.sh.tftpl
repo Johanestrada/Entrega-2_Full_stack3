@@ -92,21 +92,27 @@ if [ -n "$image_prefix_value" ]; then
 	fi
 else
 	echo "IMAGE_PREFIX vacio; se construiran las imagenes localmente."
-	# Publish the UI first so a slow or failing backend build does not leave a blank site.
 	docker compose build frontend
 fi
-docker compose up -d --no-deps frontend
 
 if docker compose build; then
-	docker compose up -d --remove-orphans
+	docker compose up -d --remove-orphans eureka-server estudiante-service asistencia-service evaluacion-service bff-service
 	for attempt in {1..12}; do
-		running_containers=$(docker compose ps --status running -q | wc -l)
-		if [ "$running_containers" -ge 6 ]; then
+		backend_containers=$(docker compose ps --status running -q eureka-server estudiante-service asistencia-service evaluacion-service bff-service | wc -l)
+		ready_services=0
+		for port in 8761 8081 8082 8083 8084; do
+			status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "http://localhost:$port" || true)
+			if [ "$status" != "000" ]; then
+				ready_services=$((ready_services + 1))
+			fi
+		done
+		if [ "$backend_containers" -ge 5 ] && [ "$ready_services" -ge 5 ]; then
 			break
 		fi
-		docker compose up -d --remove-orphans
+		docker compose up -d --remove-orphans eureka-server estudiante-service asistencia-service evaluacion-service bff-service
 		sleep 10
 	done
+	docker compose up -d --remove-orphans frontend
 	docker compose ps
 else
 	echo "El frontend quedo disponible, pero uno o mas servicios backend no pudieron compilarse."

@@ -101,7 +101,7 @@ if docker compose build; then
 		backend_containers=$(docker compose ps --status running -q eureka-server estudiante-service asistencia-service evaluacion-service bff-service | wc -l)
 		ready_services=0
 		for port in 8761 8081 8082 8083 8084; do
-			status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "http://localhost:$port" || true)
+			status=$(curl -s -o /dev/null -w "%%{http_code}" --max-time 3 "http://localhost:$port" || true)
 			if [ "$status" != "000" ]; then
 				ready_services=$((ready_services + 1))
 			fi

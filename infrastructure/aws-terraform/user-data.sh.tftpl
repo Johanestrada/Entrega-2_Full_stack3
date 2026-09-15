@@ -68,6 +68,21 @@ API_BASE_URL=${api_url}
 IMAGE_PREFIX=${image_prefix}
 IMAGE_TAG=${image_tag}
 EOF
+cat > docker-compose.override.yml <<'COMPOSE_OVERRIDE'
+services:
+	eureka-server:
+		restart: unless-stopped
+	estudiante-service:
+		restart: unless-stopped
+	asistencia-service:
+		restart: unless-stopped
+	evaluacion-service:
+		restart: unless-stopped
+	bff-service:
+		restart: unless-stopped
+	frontend:
+		restart: unless-stopped
+COMPOSE_OVERRIDE
 # Use published images when configured; otherwise build from the cloned repository.
 image_prefix_value="${image_prefix}"
 if [ -n "$image_prefix_value" ]; then
@@ -83,7 +98,16 @@ fi
 docker compose up -d --no-deps frontend
 
 if docker compose build; then
-	docker compose up -d
+	docker compose up -d --remove-orphans
+	for attempt in {1..12}; do
+		running_containers=$(docker compose ps --status running -q | wc -l)
+		if [ "$running_containers" -ge 6 ]; then
+			break
+		fi
+		docker compose up -d --remove-orphans
+		sleep 10
+	done
+	docker compose ps
 else
 	echo "El frontend quedo disponible, pero uno o mas servicios backend no pudieron compilarse."
 fi

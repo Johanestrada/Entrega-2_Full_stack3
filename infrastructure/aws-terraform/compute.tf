@@ -1,7 +1,7 @@
 resource "aws_instance" "app" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
-  key_name                    = "vockey"
+  key_name                    = "colegio-vockey-local"
   subnet_id                   = local.public_subnet_id
   vpc_security_group_ids      = [local.ec2_security_group_id]
   associate_public_ip_address = true

@@ -39,6 +39,8 @@ resource "aws_security_group" "ec2" {
   description = "Security group for frontend and BFF EC2"
   vpc_id      = local.vpc_id
 
+  depends_on = [aws_security_group.alb]
+
   ingress {
     protocol    = "tcp"
     from_port   = 4173

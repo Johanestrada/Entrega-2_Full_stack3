@@ -18,7 +18,6 @@ resource "aws_lb_target_group" "bff" {
 }
 
 resource "aws_lb" "bff" {
-  count              = data.external.discovery.result.alb_exists == "true" ? 0 : 1
   name               = "${local.name}-alb"
   internal           = true
   load_balancer_type = "application"

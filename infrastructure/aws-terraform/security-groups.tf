@@ -12,8 +12,19 @@ resource "aws_security_group" "vpc_link" {
   }
 }
 
+resource "aws_security_group_rule" "vpc_link_egress" {
+  count = data.external.discovery.result.vpc_link_security_group_exists == "true" ? 1 : 0
+
+  type              = "egress"
+  security_group_id = local.vpc_link_security_group_id
+  protocol          = "-1"
+  from_port         = 0
+  to_port           = 0
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow API Gateway VPC Link traffic to private integrations"
+}
+
 resource "aws_security_group" "alb" {
-  count       = data.external.discovery.result.alb_exists == "true" ? 0 : 1
   name        = "${local.name}-alb"
   description = "Security group for internal BFF ALB"
   vpc_id      = local.vpc_id
@@ -82,7 +93,6 @@ resource "aws_security_group" "ec2" {
 }
 
 resource "aws_security_group" "rds" {
-  count       = var.existing_rds_security_group_id == "" && data.external.discovery.result.rds_security_group_exists != "true" ? 1 : 0
   name        = "${local.name}-rds"
   description = "Security group for MySQL RDS"
   vpc_id      = local.vpc_id

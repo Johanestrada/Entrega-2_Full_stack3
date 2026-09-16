@@ -20,7 +20,7 @@ output "endpoint_api_gateway" {
 
 output "dns_alb_interno" {
   description = "DNS interno del Application Load Balancer."
-  value       = data.external.discovery.result.alb_exists == "true" ? data.aws_lb.existing[0].dns_name : aws_lb.bff[0].dns_name
+  value       = data.external.discovery.result.alb_exists == "true" ? data.aws_lb.existing[0].dns_name : aws_lb.bff.dns_name
 }
 
 output "id_vpc_link" {

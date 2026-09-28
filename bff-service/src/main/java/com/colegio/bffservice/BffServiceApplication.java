@@ -25,11 +25,14 @@ public class BffServiceApplication {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**")
-						.allowedOrigins(allowedOrigin)
+				var mapping = registry.addMapping("/**")
 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-						.allowedHeaders("*")
-						.allowCredentials(true);
+						.allowedHeaders("*");
+				if ("*".equals(allowedOrigin)) {
+					mapping.allowedOriginPatterns("*").allowCredentials(false);
+				} else {
+					mapping.allowedOrigins(allowedOrigin).allowCredentials(true);
+				}
 			}
 		};
 	}

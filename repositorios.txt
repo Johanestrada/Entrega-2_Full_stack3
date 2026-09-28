@@ -1,0 +1,214 @@
+===============================================
+REPOSITORIOS DEL PROYECTO
+Entrega 2 - Full Stack III
+===============================================
+
+Estudiante: Johan Estrada, Juan Opazo
+Docente: Israel Alejandro
+Sección: 302D
+Fecha: 2026-06-11
+
+===============================================
+REPOSITORIOS PRINCIPALES
+===============================================
+
+1. REPOSITORIO PRINCIPAL
+   Nombre: Entrega-2_Full_stack3
+   URL: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3
+   Descripción: Contiene la estructura completa del proyecto, 
+                docker-compose.yml, y documentación general.
+                Incluye todos los microservicios y frontend.
+   Rama principal: main
+   Rama de desarrollo: develop
+
+2. FRONTEND (ubicado en /frontend)
+   Descripción: Aplicación React + Vite para el portal académico.
+                Consume endpoints del BFF en puerto 8084.
+                Incluye autenticación, login, registro, y gestión de 
+                estudiantes, asistencias y evaluaciones.
+   Tecnologías: React 18, Vite, React Router, Bootstrap
+   Puerto: 4173
+   Scripts: npm run dev, npm run build, npm run test
+
+3. BFF SERVICE - Backend for Frontend (ubicado en /bff-service)
+   Descripción: Orquesta y compone datos de los microservicios.
+                Expone API unificada al frontend.
+                Implementa Facade Pattern para composición de datos.
+                Incluye autenticación básica con JWT.
+   Tecnologías: Spring Boot, WebClient, Eureka Client, JWT
+   Puerto: 8084
+   Controladores: AcademicoController, AuthController
+   Facade: AcademicoFacade
+
+4. ESTUDIANTE SERVICE (ubicado en /estudiante-service)
+   Descripción: Microservicio para gestión de estudiantes.
+   Tecnologías: Spring Boot, Spring Data JPA, Eureka Client
+   Puerto: 8081
+   Controlador: EstudianteController
+   Entidad: Estudiante (id, nombre, curso, run)
+   Endpoints:
+     - GET /estudiantes (listar todos)
+     - GET /estudiantes/{id} (obtener por ID)
+     - GET /estudiantes/run/{run} (buscar por RUN)
+     - GET /estudiantes/curso/{curso} (listar por curso)
+     - POST /estudiantes (crear)
+     - DELETE /estudiantes/{id} (eliminar)
+
+5. ASISTENCIA SERVICE (ubicado en /asistencia-service)
+   Descripción: Microservicio para gestión de asistencias.
+   Tecnologías: Spring Boot, Spring Data JPA, Eureka Client
+   Puerto: 8082
+   Controlador: AsistenciaController
+   Entidad: Asistencia (id, estudianteId, fecha, presente)
+   Endpoints:
+     - GET /asistencias (listar todas)
+     - GET /asistencias/{id} (obtener por ID)
+     - GET /asistencias/estudiante/{estudianteId} (por estudiante)
+     - POST /asistencias (crear)
+     - PUT /asistencias/{id} (actualizar)
+     - DELETE /asistencias/{id} (eliminar)
+
+6. EVALUACION SERVICE (ubicado en /evaluacion-service)
+   Descripción: Microservicio para gestión de evaluaciones.
+   Tecnologías: Spring Boot, Spring Data JPA, Eureka Client
+   Puerto: 8083
+   Controlador: EvaluacionController
+   Entidad: Evaluacion (id, estudianteId, materia, nota)
+   Endpoints:
+     - GET /evaluaciones (listar todas)
+     - GET /evaluaciones/{id} (obtener por ID)
+     - GET /evaluaciones?nombre={nombre} (buscar por nombre)
+     - GET /evaluaciones/estudiante/{estudianteId} (por estudiante)
+     - POST /evaluaciones (crear)
+     - PUT /evaluaciones/{id} (actualizar nota)
+     - DELETE /evaluaciones/{id} (eliminar)
+
+7. EUREKA SERVER (ubicado en /eureka-server)
+   Descripción: Servidor de descubrimiento dinámico de servicios.
+                Permite que BFF y microservicios se localicen automáticamente.
+   Tecnologías: Spring Boot, Eureka Server
+   Puerto: 8761
+   URL: http://localhost:8761/eureka
+
+===============================================
+TECNOLOGÍAS UTILIZADAS
+===============================================
+
+Backend:
+  - Java 17
+  - Spring Boot 3.x
+  - Spring Data JPA
+  - Spring Cloud Eureka
+  - Hibernate ORM
+  - Maven 3.x
+
+Frontend:
+  - React 18
+  - Vite 5
+  - React Router v7
+  - Bootstrap 5
+  - JavaScript ES6+
+
+Base de datos:
+  - MySQL 8 (Docker)
+  - JDBC drivers
+
+Orquestación:
+  - Docker Compose
+
+API & Documentación:
+  - REST/JSON
+  - Swagger/OpenAPI (springdoc-openapi)
+
+Testing:
+  - JUnit 5
+  - Spring Boot Test
+  - Mockito
+  - WebMvcTest
+
+Build Tools:
+  - Maven
+  - NPM
+
+===============================================
+PUERTOS UTILIZADOS
+===============================================
+
+3306  → MySQL Database
+4173  → Frontend React
+8081  → Estudiante Service
+8082  → Asistencia Service
+8083  → Evaluacion Service
+8084  → BFF Service
+8761  → Eureka Server
+
+===============================================
+INSTRUCCIONES DE EJECUCIÓN
+===============================================
+
+1. Requisitos previos:
+   - Docker y Docker Compose instalados
+   - Java 17+ (para ejecución local sin Docker)
+   - Node.js 16+ (para frontend local)
+
+2. Descargar el repositorio:
+   git clone [URL_REPOSITORIO_PRINCIPAL]
+   cd Entrega-2_Full_stack3
+
+3. Ejecutar con Docker Compose:
+   docker-compose up
+   
+   Esto levantará:
+   - MySQL en puerto 3306
+   - Eureka Server en puerto 8761
+   - Estudiante Service en puerto 8081
+   - Asistencia Service en puerto 8082
+   - Evaluacion Service en puerto 8083
+   - BFF Service en puerto 8084
+   - Frontend en puerto 4173
+
+4. Acceder a la aplicación:
+   Frontend: http://localhost:4173
+
+5. Documentación de API (Swagger):
+   - BFF: http://localhost:8084/swagger-ui.html
+   - Estudiantes: http://localhost:8081/swagger-ui.html
+   - Asistencias: http://localhost:8082/swagger-ui.html
+   - Evaluaciones: http://localhost:8083/swagger-ui.html
+
+6. Panel Eureka:
+   http://localhost:8761
+
+===============================================
+CREDENCIALES DE PRUEBA
+===============================================
+
+Usuario: admin
+Contraseña: admin123
+
+Usuario: alumno
+Contraseña: password
+
+===============================================
+DOCUMENTACIÓN ADICIONAL
+===============================================
+
+Informe general: Consulte el documento "Informe_Entrega_2.pdf"
+Diagrama de arquitectura: Consulte "Diagrama_Arquitectura.png"
+Informe de persistencia: Consulte "Descripcion_Persistencia.pdf"
+Informe de pruebas: Consulte "Informe_Pruebas_Unitarias.pdf"
+
+===============================================
+CONTACTO Y EQUIPO
+===============================================
+
+Integrantes:
+  - Johan Estrada
+  - Juan Opazo
+
+Docente: Israel Alejandro
+Sección: 302D
+Asignatura: DSY1106 - DESARROLLO FULLSTACK III
+Institución: Instituto Profesional
+
+===============================================

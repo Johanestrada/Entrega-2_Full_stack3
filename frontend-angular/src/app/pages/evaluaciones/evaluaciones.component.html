@@ -1,0 +1,122 @@
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2>Gestión de Evaluaciones</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-primary" (click)="openForm()">
+        <i class="bi bi-plus-lg"></i> Nueva Evaluación
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Estudiante</th>
+          <th>Evaluación</th>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Puntaje</th>
+          <th>Calificación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let evaluacion of evaluaciones">
+          <td>{{ getEstudianteName(evaluacion.estudiante_id) }}</td>
+          <td>{{ evaluacion.nombre_evaluacion }}</td>
+          <td>{{ evaluacion.tipo }}</td>
+          <td>{{ evaluacion.fecha | date:'short' }}</td>
+          <td>{{ evaluacion.puntaje }}</td>
+          <td>
+            <span [ngClass]="getCalificacionClass(evaluacion.calificacion)">
+              {{ evaluacion.calificacion | number:'1.1-1' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="openForm(evaluacion)">
+              Editar
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteEvaluacion(evaluacion.id!)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="evaluaciones.length === 0" class="alert alert-info">
+      No hay evaluaciones registradas.
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showForm" class="modal d-block" style="background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ selectedEvaluacion?.id ? 'Editar Evaluación' : 'Nueva Evaluación' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Estudiante</label>
+              <select class="form-select" [(ngModel)]="formData.estudiante_id" name="estudiante_id" required>
+                <option value="">Seleccionar estudiante...</option>
+                <option *ngFor="let est of estudiantes" [value]="est.id">
+                  {{ est.nombre }} {{ est.apellido }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre de la Evaluación</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.nombre_evaluacion" name="nombre_evaluacion" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.tipo" name="tipo" placeholder="Ej: Prueba, Tarea, Examen" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha</label>
+              <input type="datetime-local" class="form-control" [(ngModel)]="formData.fecha" name="fecha" required />
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Puntaje</label>
+                  <input type="number" class="form-control" [(ngModel)]="formData.puntaje" name="puntaje" required />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Calificación</label>
+                  <input type="number" step="0.1" class="form-control" [(ngModel)]="formData.calificacion" name="calificacion" required />
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
+              <textarea class="form-control" [(ngModel)]="formData.observaciones" name="observaciones" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="saveEvaluacion()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

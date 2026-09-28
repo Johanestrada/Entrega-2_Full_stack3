@@ -1,0 +1,87 @@
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2>Gestión de Estudiantes</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-primary" (click)="openForm()">
+        <i class="bi bi-plus-lg"></i> Nuevo Estudiante
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Nombre</th>
+          <th>RUN</th>
+          <th>Curso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let estudiante of estudiantes">
+          <td>{{ estudiante.nombre }}</td>
+          <td>{{ estudiante.run || estudiante.rut }}</td>
+          <td>{{ estudiante.curso || estudiante.matricula }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="openForm(estudiante)">
+              Editar
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteEstudiante(estudiante.id!)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="estudiantes.length === 0" class="alert alert-info">
+      No hay estudiantes registrados.
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showForm" class="modal d-block" style="background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ selectedEstudiante?.id ? 'Editar Estudiante' : 'Nuevo Estudiante' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+          <p class="text-muted small">Registra los datos básicos del alumno.</p>
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.nombre" name="nombre" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">RUN</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.run" name="run" placeholder="Ej: 22.333.444-5" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Curso</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.curso" name="curso" placeholder="Ej: 1-A" required />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="saveEstudiante()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

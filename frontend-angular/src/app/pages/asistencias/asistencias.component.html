@@ -1,0 +1,104 @@
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2>Gestión de Asistencias</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-primary" (click)="openForm()">
+        <i class="bi bi-plus-lg"></i> Registrar Asistencia
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Estudiante</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Observaciones</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let asistencia of asistencias">
+          <td>{{ getEstudianteName(asistencia.estudiante_id) }}</td>
+          <td>{{ asistencia.fecha | date:'short' }}</td>
+          <td>
+            <span [ngClass]="getEstadoClass(asistencia.estado)">
+              {{ asistencia.estado | uppercase }}
+            </span>
+          </td>
+          <td>{{ asistencia.observaciones || '-' }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="openForm(asistencia)">
+              Editar
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteAsistencia(asistencia.id!)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="asistencias.length === 0" class="alert alert-info">
+      No hay registros de asistencia.
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showForm" class="modal d-block" style="background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ selectedAsistencia?.id ? 'Editar Asistencia' : 'Registrar Asistencia' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Estudiante</label>
+              <select class="form-select" [(ngModel)]="formData.estudiante_id" name="estudiante_id" required>
+                <option value="">Seleccionar estudiante...</option>
+                <option *ngFor="let est of estudiantes" [value]="est.id">
+                  {{ est.nombre }} {{ est.apellido }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha</label>
+              <input type="datetime-local" class="form-control" [(ngModel)]="formData.fecha" name="fecha" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Estado</label>
+              <select class="form-select" [(ngModel)]="formData.estado" name="estado" required>
+                <option value="presente">Presente</option>
+                <option value="ausente">Ausente</option>
+                <option value="justificado">Justificado</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
+              <textarea class="form-control" [(ngModel)]="formData.observaciones" name="observaciones" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="saveAsistencia()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

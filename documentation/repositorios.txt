@@ -1,0 +1,214 @@
+# REPOSITORIOS - ENTREGA 2 FULL STACK III
+
+## Repositorio Principal
+Nombre: Juan-Pablo26/Entrega-2_Full_stack3
+URL: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3
+Rama principal: develop (36 commits adelante de main)
+Visibilidad: Public
+
+---
+
+## RAMAS DISPONIBLES
+
+### Ramas Principales
+- main: Rama estable
+- develop: Rama de desarrollo (RAMA ACTUAL - 36 commits adelante)
+
+### Ramas de Características (Feature Branches)
+- feature/documentacion
+- feature/back-solicitudes-service
+- feature/back-reservas-service
+- feature/estudiante-service
+- feature/eureka-server
+- feature/evaluacion-service
+- feature/frontend
+- feature/asistencia-service
+
+### Ver todas las ramas
+URL: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/branches
+
+---
+
+## COMPONENTES DEL PROYECTO
+
+### 1. BFF-Service (Backend For Frontend)
+- Ruta: /bff-service
+- Puerto: 8084
+- Función: Orquesta y compone datos de microservicios
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/bff-service
+- Swagger: http://localhost:8084/swagger-ui.html
+
+### 2. Estudiante-Service
+- Ruta: /estudiante-service
+- Puerto: 8081
+- Función: Gestión de estudiantes (CRUD)
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/estudiante-service
+- Swagger: http://localhost:8081/swagger-ui.html
+
+### 3. Asistencia-Service
+- Ruta: /asistencia-service
+- Puerto: 8082
+- Función: Registro y seguimiento de asistencias
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/asistencia-service
+- Swagger: http://localhost:8082/swagger-ui.html
+
+### 4. Evaluacion-Service
+- Ruta: /evaluacion-service
+- Puerto: 8083
+- Función: Gestión de evaluaciones y calificaciones
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/evaluacion-service
+- Swagger: http://localhost:8083/swagger-ui.html
+
+### 5. Eureka-Server
+- Ruta: /eureka-server
+- Puerto: 8761
+- Función: Service Discovery (descubrimiento de servicios)
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/eureka-server
+- Console: http://localhost:8761
+
+### 6. Frontend (React)
+- Ruta: /frontend
+- Puerto: 4173 (Vite dev server)
+- Framework: React + Vite
+- URL directa: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/frontend
+- Comandos:
+  - npm install
+  - npm run dev (desarrollo)
+  - npm run build (producción)
+
+---
+
+## DOCUMENTACIÓN
+
+### Archivos en /documentation
+URL: https://github.com/Juan-Pablo26/Entrega-2_Full_stack3/tree/develop/documentation
+
+- **Descripcion_Persistencia.pdf**: Esquemas BD, JPA, DDL, configuración
+- **Informe_Pruebas_Unitarias.pdf**: 17 tests (4 unit + 6 integration + 7 E2E)
+- **API_REST_Especificacion.pdf**: Endpoints BFF y microservicios con ejemplos
+- **diagramma.png**: Diagrama de arquitectura del sistema
+- **repositorios.txt**: Este archivo
+
+### Diagrama de Arquitectura
+Ubicación: documentation/diagramma.png
+Descripción: Visualización de componentes, flujos y conexiones del sistema
+
+---
+
+## CREDENCIALES DE PRUEBA
+
+### Usuarios de Autenticación
+- Usuario: admin
+  Contraseña: admin123
+  Rol: Administrador
+
+- Usuario: alumno
+  Contraseña: password
+  Rol: Estudiante
+
+---
+
+## INSTRUCCIONES DE EJECUCIÓN
+
+### Requisitos Previos
+- Java 17 o superior
+- Maven 3.8+
+- Node.js 16+ (para frontend)
+- Docker (opcional, para docker-compose)
+
+### Opción 1: Ejecución Local (Maven)
+
+1. Clonar repositorio:
+   git clone https://github.com/Juan-Pablo26/Entrega-2_Full_stack3.git
+   cd Entrega-2_Full_stack3
+   git checkout develop
+
+2. Instalar dependencias:
+   ./mvnw clean install
+
+3. Iniciar Eureka Server (primero):
+   cd eureka-server
+   ./mvnw spring-boot:run
+
+4. En terminales separadas, iniciar microservicios:
+   cd estudiante-service && ./mvnw spring-boot:run
+   cd asistencia-service && ./mvnw spring-boot:run
+   cd evaluacion-service && ./mvnw spring-boot:run
+   cd bff-service && ./mvnw spring-boot:run
+
+5. Iniciar Frontend (nueva terminal):
+   cd frontend
+   npm install
+   npm run dev
+
+6. Acceder a:
+   - Frontend: http://localhost:4173
+   - BFF Swagger: http://localhost:8084/swagger-ui.html
+   - Eureka: http://localhost:8761
+
+### Opción 2: Docker Compose
+   docker-compose up
+
+   Todos los servicios se iniciarán automáticamente en sus respectivos puertos.
+
+---
+
+## EJECUCIÓN DE TESTS
+
+### Tests Disponibles
+Ubicación: bff-service/src/test/java/
+
+- BffServiceApplicationTests (4 tests unitarios)
+- AcademicoIntegrationTest (6 tests integración)
+- AcademicoE2ETest (7 tests end-to-end)
+
+**Total: 17 tests, 100% PASANDO ✅**
+
+### Comandos
+
+Ejecutar todos los tests:
+   cd bff-service
+   ./mvnw test
+
+Ejecutar tests específicos:
+   ./mvnw test -Dtest=BffServiceApplicationTests
+   ./mvnw test -Dtest=AcademicoIntegrationTest
+   ./mvnw test -Dtest=AcademicoE2ETest
+
+Generar cobertura JaCoCo:
+   ./mvnw clean test jacoco:report
+   (Reportes en: target/site/jacoco/index.html)
+
+---
+
+## TECNOLOGÍAS UTILIZADAS
+
+### Backend
+- Java 17
+- Spring Boot 3.5.14
+- Spring Cloud 2025.0.2
+- Spring Security + JWT
+- Spring Data JPA
+- Hibernate ORM
+- MySQL 8
+- Eureka (Service Discovery)
+
+### Frontend
+- React 18
+- Vite (build tool)
+- Axios (HTTP client)
+- CORS habilitado
+
+### Testing
+- JUnit 5 (Jupiter)
+- Mockito 5.x
+- Spring Boot Test
+- OkHttp MockWebServer
+- Hamcrest Matchers
+
+### DevOps
+- Docker & Docker Compose
+- Maven
+- npm
+
+---

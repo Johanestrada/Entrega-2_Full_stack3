@@ -60,8 +60,8 @@ $albArn = if ($null -ne $loadBalancer) { [string]$loadBalancer.LoadBalancerArn }
 $albSecurityGroupId = if ($null -ne $loadBalancer -and $loadBalancer.SecurityGroups.Count -gt 0) { [string]$loadBalancer.SecurityGroups[0] } else { '' }
 
 $result = [ordered]@{
-  target_group_exists       = ([string]($null -ne $targetGroup)).ToLowerInvariant()
-  target_group_arn          = if ($null -ne $targetGroup) { [string]$targetGroup.TargetGroupArn } else { '' }
+  target_group_exists       = "false"
+  target_group_arn          = ""
   vpc_link_security_group_exists = ([string]($null -ne $vpcLinkSecurityGroup)).ToLowerInvariant()
   vpc_link_security_group_id = if ($null -ne $vpcLinkSecurityGroup) { [string]$vpcLinkSecurityGroup.GroupId } else { '' }
   vpc_link_exists            = ([string]($null -ne $vpcLink)).ToLowerInvariant()

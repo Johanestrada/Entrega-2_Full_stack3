@@ -126,8 +126,13 @@ services:
     ports:
       - '8085:8085'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=guest
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=guest

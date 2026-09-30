@@ -1,123 +1,108 @@
 package com.colegio.rabbit_admin.controller;
 
-import com.colegio.rabbit_admin.dto.EventoAsistencia;
-import com.colegio.rabbit_admin.dto.EventoEstudiante;
-import com.colegio.rabbit_admin.dto.EventoEvaluacion;
-import com.colegio.rabbit_admin.service.EventPublisherService;
-import lombok.extern.slf4j.Slf4j;
+import com.colegio.rabbit_admin.dto.BindingRequest;
+import com.colegio.rabbit_admin.dto.ExchangeRequest;
+import com.colegio.rabbit_admin.dto.QueueRequest;
+import com.colegio.rabbit_admin.service.RabbitAdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/rabbit-admin")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
+@Tag(name = "Rabbit Admin", description = "Gestión de colas, exchanges y bindings de RabbitMQ")
 public class RabbitAdminController {
 
-    private final EventPublisherService eventPublisherService;
+    private final RabbitAdminService rabbitAdminService;
 
-    public RabbitAdminController(EventPublisherService eventPublisherService) {
-        this.eventPublisherService = eventPublisherService;
+    @PostMapping("/queues")
+    @Operation(summary = "Crear una cola", description = "Crea una nueva cola en RabbitMQ con sus opciones de durabilidad, exclusividad y DLQ.", responses = {
+            @ApiResponse(responseCode = "201", description = "Cola creada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "409", description = "La cola ya existe")
+    })
+    public ResponseEntity<?> createQueue(@Valid @RequestBody QueueRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(rabbitAdminService.createQueue(request));
     }
 
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, String>> health() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("service", "rabbit-admin");
-        response.put("message", "RabbitMQ Admin Service está operativo");
-        return ResponseEntity.ok(response);
+    @GetMapping("/queues")
+    @Operation(summary = "Listar colas", description = "Devuelve el listado de colas existentes en RabbitMQ.", responses = {
+            @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
+    })
+    public ResponseEntity<List<String>> listQueues() {
+        return ResponseEntity.ok(rabbitAdminService.listQueues());
     }
 
-    @PostMapping("/eventos/estudiante")
-    public ResponseEntity<?> publicarEventoEstudiante(@RequestBody EventoEstudiante evento) {
-        try {
-            log.info("Recibiendo evento de estudiante: {}", evento.getNombre());
-            eventPublisherService.publicarEventoEstudiante(evento);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Evento de estudiante publicado exitosamente");
-            response.put("eventId", evento.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
-        } catch (Exception e) {
-            log.error("Error publicando evento estudiante", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
+    @DeleteMapping("/queues/{name}")
+    @Operation(summary = "Eliminar una cola", description = "Elimina una cola existente por nombre.", responses = {
+            @ApiResponse(responseCode = "204", description = "Cola eliminada correctamente"),
+            @ApiResponse(responseCode = "404", description = "La cola no existe")
+    })
+    public ResponseEntity<Void> deleteQueue(
+            @Parameter(description = "Nombre de la cola a eliminar", required = true)
+            @PathVariable String name) {
+        rabbitAdminService.deleteQueue(name);
+        return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/eventos/asistencia")
-    public ResponseEntity<?> publicarEventoAsistencia(@RequestBody EventoAsistencia evento) {
-        try {
-            log.info("Recibiendo evento de asistencia para estudiante: {}", evento.getEstudianteId());
-            eventPublisherService.publicarEventoAsistencia(evento);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Evento de asistencia publicado exitosamente");
-            response.put("eventId", evento.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
-        } catch (Exception e) {
-            log.error("Error publicando evento asistencia", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
+    @PostMapping("/exchanges")
+    @Operation(summary = "Crear un exchange", description = "Crea un exchange con el tipo indicado (direct, topic, fanout, headers).", responses = {
+            @ApiResponse(responseCode = "201", description = "Exchange creado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "409", description = "El exchange ya existe")
+    })
+    public ResponseEntity<?> createExchange(@Valid @RequestBody ExchangeRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(rabbitAdminService.createExchange(request));
     }
 
-    @PostMapping("/eventos/evaluacion")
-    public ResponseEntity<?> publicarEventoEvaluacion(@RequestBody EventoEvaluacion evento) {
-        try {
-            log.info("Recibiendo evento de evaluación para estudiante: {}", evento.getEstudianteId());
-            eventPublisherService.publicarEventoEvaluacion(evento);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Evento de evaluación publicado exitosamente");
-            response.put("eventId", evento.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
-        } catch (Exception e) {
-            log.error("Error publicando evento evaluacion", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
+    @GetMapping("/exchanges")
+    @Operation(summary = "Listar exchanges", description = "Devuelve el listado de exchanges existentes en RabbitMQ.", responses = {
+            @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
+    })
+    public ResponseEntity<List<String>> listExchanges() {
+        return ResponseEntity.ok(rabbitAdminService.listExchanges());
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<Map<String, Object>> getInfo() {
-        Map<String, Object> info = new HashMap<>();
-        info.put("service", "rabbit-admin");
-        info.put("version", "1.0.0");
-        info.put("colas", new String[]{
-            "eventos.estudiante",
-            "eventos.asistencia",
-            "eventos.evaluacion"
-        });
-        info.put("dlqs", new String[]{
-            "eventos.estudiante.dlq",
-            "eventos.asistencia.dlq",
-            "eventos.evaluacion.dlq"
-        });
-        info.put("endpoints", new String[]{
-            "POST /api/rabbit-admin/eventos/estudiante",
-            "POST /api/rabbit-admin/eventos/asistencia",
-            "POST /api/rabbit-admin/eventos/evaluacion",
-            "GET /api/rabbit-admin/health",
-            "GET /api/rabbit-admin/info"
-        });
-        return ResponseEntity.ok(info);
+    @DeleteMapping("/exchanges/{name}")
+    @Operation(summary = "Eliminar un exchange", description = "Elimina un exchange por nombre.", responses = {
+            @ApiResponse(responseCode = "204", description = "Exchange eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "El exchange no existe")
+    })
+    public ResponseEntity<Void> deleteExchange(
+            @Parameter(description = "Nombre del exchange a eliminar", required = true)
+            @PathVariable String name) {
+        rabbitAdminService.deleteExchange(name);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/bindings")
+    @Operation(summary = "Crear un binding", description = "Crea un binding entre una cola y un exchange con una routing key.", responses = {
+            @ApiResponse(responseCode = "201", description = "Binding creado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "La cola o el exchange no existe")
+    })
+    public ResponseEntity<?> createBinding(@Valid @RequestBody BindingRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(rabbitAdminService.createBinding(request));
+    }
+
+    @DeleteMapping("/bindings")
+    @Operation(summary = "Eliminar un binding", description = "Elimina un binding entre una cola y un exchange usando una routing key.", responses = {
+            @ApiResponse(responseCode = "204", description = "Binding eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "La cola o el exchange no existe")
+    })
+    public ResponseEntity<Void> deleteBinding(@Valid @RequestBody BindingRequest request) {
+        rabbitAdminService.deleteBinding(request);
+        return ResponseEntity.noContent().build();
     }
 }

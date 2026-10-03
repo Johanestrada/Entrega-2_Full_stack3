@@ -20,7 +20,7 @@ public class ExchangeRequest {
     private String name;
 
     @NotBlank(message = "El tipo del exchange es obligatorio")
-    @Pattern(regexp = "^(direct|topic|fanout|headers)$", flags = java.util.regex.Pattern.Flag.CASE_INSENSITIVE,
+    @Pattern(regexp = "^(direct|topic|fanout|headers)$", flags = Pattern.Flag.CASE_INSENSITIVE,
             message = "El tipo del exchange debe ser: direct, topic, fanout o headers")
     private String type;
 

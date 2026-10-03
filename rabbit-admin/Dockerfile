@@ -1,15 +1,15 @@
-FROM eclipse-temurin:21-jre
-
+FROM eclipse-temurin:21-jdk-jammy AS build
 WORKDIR /app
-
-COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
-RUN chmod +x mvnw
-RUN ./mvnw -q dependency:go-offline
+COPY .mvn .mvn
+COPY src src
+RUN chmod +x ./mvnw
+RUN ./mvnw -B clean package -DskipTests
 
-COPY src ./src
-RUN ./mvnw -q -DskipTests package
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8085
 
-ENTRYPOINT ["java", "-jar", "/app/target/rabbit-admin-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

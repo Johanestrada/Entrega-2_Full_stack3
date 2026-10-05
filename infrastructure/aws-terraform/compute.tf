@@ -1,7 +1,7 @@
 resource "aws_instance" "app" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
-  key_name                    = "colegio-vockey-local"
+  key_name                    = var.ec2_key_name != "" ? var.ec2_key_name : null
   subnet_id                   = local.public_subnet_id
   vpc_security_group_ids      = [local.ec2_security_group_id]
   associate_public_ip_address = true
@@ -22,6 +22,8 @@ resource "aws_instance" "app" {
     db_host        = local.rds_address
     db_user        = var.mysql_admin_login
     db_password    = var.mysql_admin_password
+    rabbit_username = var.rabbitmq_username
+    rabbit_password = var.rabbitmq_password
     issuer         = var.jwt_issuer_uri
     audience       = var.jwt_audience
     entra_tenant   = var.entra_tenant_id

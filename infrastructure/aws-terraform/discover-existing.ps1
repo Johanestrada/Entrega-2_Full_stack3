@@ -18,9 +18,10 @@ function Invoke-AwsJson {
 $region = $request.region
 $projectName = $request.name
 $vpcId = $request.vpc_id
+$targetGroupName = $request.target_group_name
 
 $targetGroup = Invoke-AwsJson @(
-  'elbv2', 'describe-target-groups', '--region', $region, '--names', "$projectName-bff-v1", '--output', 'json'
+  'elbv2', 'describe-target-groups', '--region', $region, '--names', $targetGroupName, '--output', 'json'
 )
 $targetGroup = if ($null -ne $targetGroup) { $targetGroup.TargetGroups | Select-Object -First 1 } else { $null }
 
@@ -58,10 +59,11 @@ $apiId = if ($null -ne $api) { [string]$api.ApiId } else { '' }
 $apiArn = if ($null -ne $api) { [string]$api.ApiEndpoint } else { '' }
 $albArn = if ($null -ne $loadBalancer) { [string]$loadBalancer.LoadBalancerArn } else { '' }
 $albSecurityGroupId = if ($null -ne $loadBalancer -and $loadBalancer.SecurityGroups.Count -gt 0) { [string]$loadBalancer.SecurityGroups[0] } else { '' }
+$targetGroupArn = if ($null -ne $targetGroup) { [string]$targetGroup.TargetGroupArn } else { '' }
 
 $result = [ordered]@{
-  target_group_exists       = "false"
-  target_group_arn          = ""
+  target_group_exists       = ([string]($null -ne $targetGroup)).ToLowerInvariant()
+  target_group_arn          = $targetGroupArn
   vpc_link_security_group_exists = ([string]($null -ne $vpcLinkSecurityGroup)).ToLowerInvariant()
   vpc_link_security_group_id = if ($null -ne $vpcLinkSecurityGroup) { [string]$vpcLinkSecurityGroup.GroupId } else { '' }
   vpc_link_exists            = ([string]($null -ne $vpcLink)).ToLowerInvariant()

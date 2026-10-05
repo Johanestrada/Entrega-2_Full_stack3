@@ -60,9 +60,34 @@ variable "mysql_admin_login" {
   type    = string
   default = "colegioadmin"
 }
+variable "rabbitmq_username" {
+  type        = string
+  description = "Usuario de aplicación y administración de RabbitMQ."
+  default     = "colegio_app"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_.-]{1,64}$", var.rabbitmq_username))
+    error_message = "El usuario RabbitMQ debe tener entre 1 y 64 caracteres alfanuméricos, puntos, guiones o guiones bajos."
+  }
+}
+variable "rabbitmq_password" {
+  type        = string
+  description = "Contraseña aleatoria de RabbitMQ. Proporciónala con TF_VAR_rabbitmq_password."
+  sensitive   = true
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_-]{6,128}$", var.rabbitmq_password))
+    error_message = "La contraseña RabbitMQ debe tener entre 6 y 128 caracteres alfanuméricos, guiones o guiones bajos."
+  }
+}
 variable "instance_type" {
   type    = string
   default = "t3.medium"
+}
+variable "ec2_key_name" {
+  type        = string
+  description = "Nombre de un key pair EC2 existente en la región. Vacío crea la instancia sin acceso SSH por key pair."
+  default     = ""
 }
 
 variable "existing_vpc_id" {

@@ -41,6 +41,15 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing.evaluacion}")
     private String evaluacionRoutingKey;
 
+    @Value("${rabbitmq.routing.dlq.estudiante}")
+    private String estudianteDlqRoutingKey;
+
+    @Value("${rabbitmq.routing.dlq.asistencia}")
+    private String asistenciaDlqRoutingKey;
+
+    @Value("${rabbitmq.routing.dlq.evaluacion}")
+    private String evaluacionDlqRoutingKey;
+
     // === EXCHANGES ===
     @Bean
     public TopicExchange eventosExchange() {
@@ -57,7 +66,7 @@ public class RabbitMQConfig {
     public Queue estudianteQueue() {
         return QueueBuilder.durable(estudianteQueue)
                 .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", estudianteRoutingKey)
+                .withArgument("x-dead-letter-routing-key", estudianteDlqRoutingKey)
                 .build();
     }
 
@@ -65,7 +74,7 @@ public class RabbitMQConfig {
     public Queue asistenciaQueue() {
         return QueueBuilder.durable(asistenciaQueue)
                 .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", asistenciaRoutingKey)
+                .withArgument("x-dead-letter-routing-key", asistenciaDlqRoutingKey)
                 .build();
     }
 
@@ -73,7 +82,7 @@ public class RabbitMQConfig {
     public Queue evaluacionQueue() {
         return QueueBuilder.durable(evaluacionQueue)
                 .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", evaluacionRoutingKey)
+                .withArgument("x-dead-letter-routing-key", evaluacionDlqRoutingKey)
                 .build();
     }
 
@@ -120,20 +129,20 @@ public class RabbitMQConfig {
     public Binding estudianteDLQBinding(Queue estudianteDLQ, DirectExchange dlxExchange) {
         return BindingBuilder.bind(estudianteDLQ)
                 .to(dlxExchange)
-                .with(estudianteRoutingKey);
+                .with(estudianteDlqRoutingKey);
     }
 
     @Bean
     public Binding asistenciaDLQBinding(Queue asistenciaDLQ, DirectExchange dlxExchange) {
         return BindingBuilder.bind(asistenciaDLQ)
                 .to(dlxExchange)
-                .with(asistenciaRoutingKey);
+                .with(asistenciaDlqRoutingKey);
     }
 
     @Bean
     public Binding evaluacionDLQBinding(Queue evaluacionDLQ, DirectExchange dlxExchange) {
         return BindingBuilder.bind(evaluacionDLQ)
                 .to(dlxExchange)
-                .with(evaluacionRoutingKey);
+                .with(evaluacionDlqRoutingKey);
     }
 }

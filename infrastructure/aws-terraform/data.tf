@@ -80,6 +80,7 @@ data "external" "discovery" {
     region         = var.aws_region
     name           = local.name
     vpc_id         = local.vpc_id
+    target_group_name = local.target_group_name
     vpc_link_name  = var.vpc_link_name
     rds_identifier = var.existing_rds_identifier
   }

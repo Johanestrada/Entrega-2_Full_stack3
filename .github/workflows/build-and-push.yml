@@ -83,6 +83,16 @@ jobs:
             ghcr.io/${{ steps.meta.outputs.repo_slug }}-bff-service:${{ steps.meta.outputs.sha_tag }}
             ghcr.io/${{ steps.meta.outputs.repo_slug }}-bff-service:latest
 
+      - name: Build and push rabbit-admin
+        uses: docker/build-push-action@v4
+        with:
+          context: ./rabbit-admin
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-rabbit-admin:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-rabbit-admin:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-rabbit-admin:latest
+
       - name: Build and push frontend
         uses: docker/build-push-action@v4
         with:

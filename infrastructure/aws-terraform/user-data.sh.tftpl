@@ -72,11 +72,17 @@ JWT_ISSUER_URI=${issuer}
 JWT_AUDIENCE=${audience}
 CORS_ALLOWED_ORIGINS=$${cors_origin}
 API_BASE_URL=${api_url}
+RABBITMQ_USERNAME=${rabbit_username}
+RABBITMQ_PASSWORD=${rabbit_password}
 IMAGE_PREFIX=${image_prefix}
 IMAGE_TAG=${image_tag}
 EOF
 cat > docker-compose.override.yml <<'COMPOSE_OVERRIDE'
 services:
+  rabbitmq:
+    restart: unless-stopped
+  rabbit-admin:
+    restart: unless-stopped
   eureka-server:
     restart: unless-stopped
   estudiante-service:
@@ -90,37 +96,32 @@ services:
   frontend:
     restart: unless-stopped
 COMPOSE_OVERRIDE
-# Use published images when configured; otherwise build from the cloned repository.
+# Prefer published images when configured, with a local build as a fallback.
 image_prefix_value="${image_prefix}"
-if [ -n "$image_prefix_value" ]; then
-	if ! docker compose pull; then
-		echo "No se pudieron descargar todas las imagenes; se construiran localmente."
-		docker compose build frontend
-	fi
+if [ -n "$image_prefix_value" ] && docker compose pull; then
+	echo "Se usaran las imagenes publicadas configuradas."
+elif docker compose build; then
+	echo "Imagenes construidas localmente."
 else
-	echo "IMAGE_PREFIX vacio; se construiran las imagenes localmente."
-	docker compose build frontend
+	echo "No fue posible descargar ni construir las imagenes de la aplicacion."
+	exit 1
 fi
 
-if docker compose build; then
-	docker compose up -d --remove-orphans eureka-server estudiante-service asistencia-service evaluacion-service bff-service
-	for attempt in {1..12}; do
-		backend_containers=$(docker compose ps --status running -q eureka-server estudiante-service asistencia-service evaluacion-service bff-service | wc -l)
-		ready_services=0
-		for port in 8761 8081 8082 8083 8084; do
-			status=$(curl -s -o /dev/null -w "%%{http_code}" --max-time 3 "http://localhost:$port" || true)
-			if [ "$status" != "000" ]; then
-				ready_services=$((ready_services + 1))
-			fi
-		done
-		if [ "$backend_containers" -ge 5 ] && [ "$ready_services" -ge 5 ]; then
-			break
+docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+for attempt in {1..12}; do
+	backend_containers=$(docker compose ps --status running -q rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin | wc -l)
+	ready_services=0
+	for port in 8761 8081 8082 8083 8084 8085; do
+		status=$(curl -s -o /dev/null -w "%%{http_code}" --max-time 3 "http://localhost:$port" || true)
+		if [ "$status" != "000" ]; then
+			ready_services=$((ready_services + 1))
 		fi
-		docker compose up -d --remove-orphans eureka-server estudiante-service asistencia-service evaluacion-service bff-service
-		sleep 10
 	done
-	docker compose up -d --remove-orphans frontend
-	docker compose ps
-else
-	echo "El frontend quedo disponible, pero uno o mas servicios backend no pudieron compilarse."
-fi
+	if [ "$backend_containers" -ge 7 ] && [ "$ready_services" -ge 6 ]; then
+		break
+	fi
+	docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+	sleep 10
+done
+docker compose up -d --remove-orphans frontend
+docker compose ps

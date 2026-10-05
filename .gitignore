@@ -9,5 +9,6 @@ frontend/dist/
 infrastructure/**/.terraform/
 infrastructure/**/*.tfstate
 infrastructure/**/*.tfstate.*
+infrastructure/aws-terraform/tf-state.json
 infrastructure/**/*.tfvars
 !infrastructure/**/terraform.tfvars.example

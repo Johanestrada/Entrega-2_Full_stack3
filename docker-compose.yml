@@ -1,13 +1,43 @@
 services:
-  rabbitmq:
+  rabbitmq-1:
+    container_name: rabbitmq-1
+    hostname: rabbitmq-1
     image: rabbitmq:3.13-management-alpine
     ports:
       - '127.0.0.1:15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-colegio_app}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-colegio_app}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-rabbitmq-cluster-cookie}
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq1_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    networks:
+      - rabbitmq-cluster
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  rabbitmq-2:
+    container_name: rabbitmq-2
+    hostname: rabbitmq-2
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - '127.0.0.1:15673:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-colegio_app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-colegio_app}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-rabbitmq-cluster-cookie}
+    volumes:
+      - rabbitmq2_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    networks:
+      - rabbitmq-cluster
+    depends_on:
+      - rabbitmq-1
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
@@ -49,7 +79,9 @@ services:
         condition: service_started
       mysql:
         condition: service_healthy
-      rabbitmq:
+      rabbitmq-1:
+        condition: service_healthy
+      rabbitmq-2:
         condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://eureka-server:8761/eureka}
@@ -58,10 +90,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-change-me}
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
       SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.MySQL8Dialect}
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_ADDRESSES: rabbitmq-1:5672,rabbitmq-2:5672
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-colegio_app}
-      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-colegio_app}
       SPRING_RABBITMQ_CONNECTION_TIMEOUT: 10s
       SPRING_RABBITMQ_REQUESTED_HEARTBEAT: 30s
 
@@ -73,7 +104,9 @@ services:
     depends_on:
       eureka-server:
         condition: service_started
-      rabbitmq:
+      rabbitmq-1:
+        condition: service_healthy
+      rabbitmq-2:
         condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
@@ -82,10 +115,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
 
@@ -97,7 +129,9 @@ services:
     depends_on:
       eureka-server:
         condition: service_started
-      rabbitmq:
+      rabbitmq-1:
+        condition: service_healthy
+      rabbitmq-2:
         condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
@@ -106,10 +140,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
 
@@ -127,7 +160,9 @@ services:
         condition: service_started
       evaluacion-service:
         condition: service_started
-      rabbitmq:
+      rabbitmq-1:
+        condition: service_healthy
+      rabbitmq-2:
         condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -143,10 +178,9 @@ services:
       - JWT_ISSUER_URI=${JWT_ISSUER_URI}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
 
@@ -165,24 +199,30 @@ services:
     ports:
       - '8085:8085'
     depends_on:
-      rabbitmq:
+      rabbitmq-1:
+        condition: service_healthy
+      rabbitmq-2:
         condition: service_healthy
     environment:
-      - RABBIT_HOST=rabbitmq
+      - RABBIT_HOST=rabbitmq-1
       - RABBIT_PORT=5672
       - RABBIT_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - RABBIT_PASSWORD=${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
+      - RABBIT_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
+      - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD before starting RabbitMQ}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+    networks:
+      - rabbitmq-cluster
 
 networks:
+  rabbitmq-cluster:
+    driver: bridge
   default:
     driver: bridge
 
 volumes:
   mysql_data_e2e:
-  rabbitmq_data:
+  rabbitmq1_data:
+  rabbitmq2_data:

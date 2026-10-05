@@ -5,10 +5,9 @@ spring:
   application:
     name: rabbit-admin
   rabbitmq:
-    host: ${RABBIT_HOST:localhost}
-    port: ${RABBIT_PORT:5672}
-    username: ${RABBIT_USERNAME:guest}
-    password: ${RABBIT_PASSWORD:guest}
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:rabbitmq-1:5672,rabbitmq-2:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:colegio_app}
+    password: ${SPRING_RABBITMQ_PASSWORD:colegio_app}
     virtual-host: /
     listener:
       simple:
@@ -18,7 +17,7 @@ spring:
 
 rabbitmq:
   management:
-    url: http://${RABBIT_HOST:localhost}:15672/api
+    url: http://${RABBIT_MANAGEMENT_HOST:rabbitmq-1}:15672/api
 
 springdoc:
   api-docs:

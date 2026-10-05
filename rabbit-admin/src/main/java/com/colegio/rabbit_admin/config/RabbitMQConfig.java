@@ -65,6 +65,7 @@ public class RabbitMQConfig {
     @Bean
     public Queue estudianteQueue() {
         return QueueBuilder.durable(estudianteQueue)
+                .withArgument("x-queue-type", "quorum")
                 .withArgument("x-dead-letter-exchange", dlxExchange)
                 .withArgument("x-dead-letter-routing-key", estudianteDlqRoutingKey)
                 .build();

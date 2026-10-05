@@ -100,12 +100,21 @@ COMPOSE_OVERRIDE
 image_prefix_value="${image_prefix}"
 if [ -n "$image_prefix_value" ] && docker compose pull; then
 	echo "Se usaran las imagenes publicadas configuradas."
-elif docker compose build; then
-	echo "Imagenes construidas localmente."
 else
-	echo "No fue posible descargar ni construir las imagenes de la aplicacion."
-	exit 1
+	echo "No se pudieron descargar las imagenes; se construiran localmente."
+	if ! docker compose build frontend; then
+		echo "No se pudo construir la imagen del frontend."
+		exit 1
+	fi
+	docker compose up -d --remove-orphans frontend
+	if ! docker compose build eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin; then
+		echo "No se pudieron construir las imagenes backend."
+		exit 1
+	fi
+	echo "Frontend disponible; imagenes backend construidas localmente."
 fi
+
+docker compose up -d --remove-orphans frontend
 
 docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
 for attempt in {1..12}; do
@@ -123,5 +132,4 @@ for attempt in {1..12}; do
 	docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
 	sleep 10
 done
-docker compose up -d --remove-orphans frontend
 docker compose ps

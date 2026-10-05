@@ -158,8 +158,6 @@ services:
       - '4173:80'
     environment:
       - API_BASE_URL=${API_BASE_URL}
-    depends_on:
-      - bff-service
 
   rabbit-admin:
     image: ${IMAGE_PREFIX}rabbit-admin:${IMAGE_TAG}

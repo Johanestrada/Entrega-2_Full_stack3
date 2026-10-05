@@ -107,6 +107,8 @@ Para crear EC2 con acceso SSH, define `ec2_key_name` en `terraform.tfvars` con e
 
 El workflow de GitHub Actions publica imágenes Docker, incluido `rabbit-admin`, en GHCR. Para usarlas en EC2, configura `image_prefix` con el prefijo `ghcr.io/<owner>/<repo-en-minusculas>-` y `image_tag` con el tag publicado, y asegúrate de que la instancia pueda descargar esos paquetes. Si no se configura el prefijo o falla la descarga, el script intenta construir las imágenes localmente.
 
+Cuando la descarga de imágenes no está configurada o falla, el bootstrap construye y arranca primero el frontend y después compila los servicios backend. La página puede mostrarse antes de que la API esté lista; las operaciones que requieren el backend funcionarán cuando esos servicios terminen de arrancar.
+
 ```text
 CloudFront HTTPS
    ↓

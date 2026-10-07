@@ -4,7 +4,7 @@ services:
     hostname: rabbitmq-1
     image: rabbitmq:3.13-management-alpine
     ports:
-      - '127.0.0.1:15672:15672'
+      - '${RABBITMQ_MANAGEMENT_BIND_IP:-127.0.0.1}:15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-colegio_app}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-colegio_app}

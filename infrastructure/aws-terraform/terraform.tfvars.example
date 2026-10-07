@@ -17,7 +17,7 @@ mysql_admin_password = "CAMBIAR_ESTO"
 rabbitmq_username = "colegio_app"
 rabbitmq_password = "CAMBIAR_POR_UN_SECRETO_DE_6_A_128_CARACTERES"
 
-# SSH no se habilita por defecto; conservar vacio salvo que se agregue una regla restringida.
+# SSH y panel RabbitMQ no se habilitan por defecto; usar solo una IP autorizada /32.
 admin_cidr = ""
 
 # Vacio: Compose intentara pull y luego construira localmente si no hay imagen publicada.

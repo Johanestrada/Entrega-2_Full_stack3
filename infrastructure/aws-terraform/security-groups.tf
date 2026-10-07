@@ -84,12 +84,35 @@ resource "aws_security_group" "ec2" {
     }
   }
 
+  dynamic "ingress" {
+    for_each = var.admin_cidr == "" ? [] : [var.admin_cidr]
+    content {
+      protocol    = "tcp"
+      from_port   = 15672
+      to_port     = 15672
+      cidr_blocks = [ingress.value]
+      description = "Temporary RabbitMQ Management UI access"
+    }
+  }
+
   egress {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group_rule" "rabbitmq_management_existing_ec2" {
+  count = var.existing_ec2_security_group_id != "" && var.admin_cidr != "" ? 1 : 0
+
+  type              = "ingress"
+  security_group_id = local.ec2_security_group_id
+  protocol          = "tcp"
+  from_port         = 15672
+  to_port           = 15672
+  cidr_blocks       = [var.admin_cidr]
+  description       = "Temporary RabbitMQ Management UI access"
 }
 
 resource "aws_security_group" "rds" {

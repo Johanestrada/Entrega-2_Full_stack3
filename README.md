@@ -95,15 +95,13 @@ Plataforma académica Angular y Spring Boot para gestionar estudiantes, asistenc
 
 La infraestructura está en `infrastructure/aws-terraform/` y reutiliza la VPC, RDS, ALB y Security Groups existentes de AWS Academy.
 
-RabbitMQ se ejecuta como contenedor en la EC2, persiste sus datos en el volumen Docker `rabbitmq_data` al recrear el contenedor en la misma instancia y no publica AMQP hacia la red del host. Ese volumen local no sobrevive a la terminación o reemplazo de la EC2; para ese escenario se requiere almacenamiento EBS persistente y respaldos. El panel de administración queda ligado a `127.0.0.1:15672`; para abrirlo desde una máquina autorizada, establece un túnel SSH local (con `admin_cidr` limitado a tu IP pública):
+RabbitMQ se ejecuta como contenedor en la EC2, persiste sus datos en el volumen Docker `rabbitmq_data` al recrear el contenedor en la misma instancia y no publica AMQP hacia la red del host. Ese volumen local no sobrevive a la terminación o reemplazo de la EC2; para ese escenario se requiere almacenamiento EBS persistente y respaldos. En AWS, el panel de administración escucha en el host por el puerto `15672`; Terraform solo permite ese puerto desde el CIDR de `admin_cidr`. Usa una IP pública autorizada con máscara `/32` y accede directamente desde el navegador:
 
-```powershell
-ssh -i <ruta-a-la-clave.pem> -L 15672:127.0.0.1:15672 ec2-user@<dns-publico-ec2>
-```
+`http://<dns-publico-ec2>:15672`
 
-Luego abre `http://localhost:15672`. Define una contraseña de RabbitMQ de entre 6 y 128 caracteres usando solo letras, números, `-` o `_`. Para la práctica puedes usar `123456`, aunque es una contraseña débil y no se recomienda fuera de un entorno académico aislado. Terraform la recibe mediante `TF_VAR_rabbitmq_password`; también puedes definir `rabbitmq_username` en `terraform.tfvars` si cambias el usuario por defecto `colegio_app`. El valor queda en el estado de Terraform y en la configuración de arranque de EC2, por lo que protege también ese estado y restringe el acceso administrativo a la instancia.
+No abras el puerto a `0.0.0.0/0`. `admin_cidr` también limita SSH; si tu IP cambia, actualiza esa variable antes de aplicar Terraform. Define una contraseña de RabbitMQ de entre 6 y 128 caracteres usando solo letras, números, `-` o `_`. Para la práctica puedes usar `123456`, aunque es una contraseña débil y no se recomienda fuera de un entorno académico aislado. Terraform la recibe mediante `TF_VAR_rabbitmq_password`; también puedes definir `rabbitmq_username` en `terraform.tfvars` si cambias el usuario por defecto `colegio_app`. El valor queda en el estado de Terraform y en la configuración de arranque de EC2, por lo que protege también ese estado y restringe el acceso administrativo a la instancia.
 
-Para crear EC2 con acceso SSH, define `ec2_key_name` en `terraform.tfvars` con el nombre de un key pair existente en la región configurada. Si no lo necesitas, déjalo vacío; la instancia se creará sin key pair y no podrás usar SSH para abrir el túnel del dashboard.
+Para crear EC2 con acceso SSH, define `ec2_key_name` en `terraform.tfvars` con el nombre de un key pair existente en la región configurada. Si no lo necesitas, déjalo vacío; la instancia se creará sin key pair.
 
 El workflow de GitHub Actions publica imágenes Docker, incluido `rabbit-admin`, en GHCR. Para usarlas en EC2, configura `image_prefix` con el prefijo `ghcr.io/<owner>/<repo-en-minusculas>-` y `image_tag` con el tag publicado, y asegúrate de que la instancia pueda descargar esos paquetes. Si no se configura el prefijo o falla la descarga, el script intenta construir las imágenes localmente.
 
@@ -165,7 +163,7 @@ Accede a la documentación de cada servicio en:
 ```bash
 docker-compose up
 ```
-Antes, copia `.env.example` a `.env` y reemplaza `RABBITMQ_PASSWORD` por un secreto local aleatorio. El panel RabbitMQ se publica solo en `localhost:15672`; AMQP permanece disponible únicamente dentro de la red Docker.
+Antes, copia `.env.example` a `.env` y reemplaza `RABBITMQ_PASSWORD` por un secreto local aleatorio. En desarrollo local, el panel RabbitMQ se publica solo en `localhost:15672`; AMQP permanece disponible únicamente dentro de la red Docker.
 
 ## Instrucciones de Entrega
 Consulta el archivo [`repositorios.txt`](./repositorios.txt) para encontrar:

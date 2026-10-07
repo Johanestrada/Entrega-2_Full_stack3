@@ -13,6 +13,11 @@ output "url_frontend_ec2" {
   value       = "http://${aws_instance.app.public_dns}"
 }
 
+output "url_panel_rabbitmq" {
+  description = "URL del panel de administración RabbitMQ (accesible solo desde admin_cidr)."
+  value       = "http://${aws_instance.app.public_dns}:15672"
+}
+
 output "endpoint_api_gateway" {
   description = "Endpoint público de API Gateway."
   value       = aws_apigatewayv2_api.this.api_endpoint

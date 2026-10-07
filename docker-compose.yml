@@ -95,6 +95,9 @@ services:
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-colegio_app}
       SPRING_RABBITMQ_CONNECTION_TIMEOUT: 10s
       SPRING_RABBITMQ_REQUESTED_HEARTBEAT: 30s
+    networks:
+      - default
+      - rabbitmq-cluster
 
   asistencia-service:
     image: ${IMAGE_PREFIX}asistencia-service:${IMAGE_TAG}
@@ -120,6 +123,9 @@ services:
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+    networks:
+      - default
+      - rabbitmq-cluster
 
   evaluacion-service:
     image: ${IMAGE_PREFIX}evaluacion-service:${IMAGE_TAG}
@@ -145,6 +151,9 @@ services:
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+    networks:
+      - default
+      - rabbitmq-cluster
 
   bff-service:
     image: ${IMAGE_PREFIX}bff-service:${IMAGE_TAG}

@@ -80,7 +80,9 @@ IMAGE_TAG=${image_tag}
 EOF
 cat > docker-compose.override.yml <<'COMPOSE_OVERRIDE'
 services:
-  rabbitmq:
+  rabbitmq-1:
+    restart: unless-stopped
+  rabbitmq-2:
     restart: unless-stopped
   rabbit-admin:
     restart: unless-stopped
@@ -117,9 +119,9 @@ fi
 
 docker compose up -d --remove-orphans frontend
 
-docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+docker compose up -d --remove-orphans rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
 for attempt in {1..12}; do
-	backend_containers=$(docker compose ps --status running -q rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin | wc -l)
+	backend_containers=$(docker compose ps --status running -q rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin | wc -l)
 	ready_services=0
 	for port in 8761 8081 8082 8083 8084 8085; do
 		status=$(curl -s -o /dev/null -w "%%{http_code}" --max-time 3 "http://localhost:$port" || true)
@@ -127,10 +129,10 @@ for attempt in {1..12}; do
 			ready_services=$((ready_services + 1))
 		fi
 	done
-	if [ "$backend_containers" -ge 7 ] && [ "$ready_services" -ge 6 ]; then
+	if [ "$backend_containers" -ge 8 ] && [ "$ready_services" -ge 6 ]; then
 		break
 	fi
-	docker compose up -d --remove-orphans rabbitmq eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+	docker compose up -d --remove-orphans rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
 	sleep 10
 done
 docker compose ps

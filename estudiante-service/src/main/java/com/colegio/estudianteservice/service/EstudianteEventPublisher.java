@@ -2,6 +2,7 @@ package com.colegio.estudianteservice.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,10 @@ public class EstudianteEventPublisher {
         log.info("📤 Publicando evento estudiante.creado para id={}, nombre={}, curso={}",
                 evento.getId(), evento.getNombre(), evento.getCurso());
 
-        rabbitTemplate.convertAndSend(exchange, routingKey, evento);
+        rabbitTemplate.convertAndSend(exchange, routingKey, evento, message -> {
+            message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            return message;
+        });
 
         log.info("✅ Evento estudiante.creado publicado correctamente en exchange={} con routingKey={}",
                 exchange, routingKey);

@@ -95,11 +95,17 @@ Plataforma académica Angular y Spring Boot para gestionar estudiantes, asistenc
 
 La infraestructura está en `infrastructure/aws-terraform/` y reutiliza la VPC, RDS, ALB y Security Groups existentes de AWS Academy.
 
+### Flujo de eventos RabbitMQ
+
+Los POST de estudiantes, asistencias y evaluaciones persisten primero el registro y luego publican un evento JSON al exchange topic `eventos.exchange`. Las routing keys son `evento.estudiante.creado`, `evento.asistencia.registrada` y `evento.evaluacion.calificada`, enrutadas respectivamente a `eventos.estudiante`, `eventos.asistencia` y `eventos.evaluacion`. `rabbit-admin` consume las tres colas y confirma los mensajes válidos con ACK. Los mensajes rechazados van al exchange direct `eventos.dlx` y a su DLQ de dominio; las DLQ durables no tienen consumidores automáticos y retienen los mensajes hasta su revisión/eliminación manual. La actualización de estudiante reutiliza actualmente el flujo de guardado y también publica `estudiante.creado`.
+
 RabbitMQ se ejecuta como contenedor en la EC2, persiste sus datos en el volumen Docker `rabbitmq_data` al recrear el contenedor en la misma instancia y no publica AMQP hacia la red del host. Ese volumen local no sobrevive a la terminación o reemplazo de la EC2; para ese escenario se requiere almacenamiento EBS persistente y respaldos. En AWS, el panel de administración escucha en el host por el puerto `15672`; Terraform solo permite ese puerto desde el CIDR de `admin_cidr`. Usa una IP pública autorizada con máscara `/32` y accede directamente desde el navegador:
 
 `http://<dns-publico-ec2>:15672`
 
 No abras el puerto a `0.0.0.0/0`. `admin_cidr` también limita SSH; si tu IP cambia, actualiza esa variable antes de aplicar Terraform. Define una contraseña de RabbitMQ de entre 6 y 128 caracteres usando solo letras, números, `-` o `_`. Para la práctica puedes usar `123456`, aunque es una contraseña débil y no se recomienda fuera de un entorno académico aislado. Terraform la recibe mediante `TF_VAR_rabbitmq_password`; también puedes definir `rabbitmq_username` en `terraform.tfvars` si cambias el usuario por defecto `colegio_app`. El valor queda en el estado de Terraform y en la configuración de arranque de EC2, por lo que protege también ese estado y restringe el acceso administrativo a la instancia.
+
+Las colas `eventos.*.dlq` son durables y no tienen consumidores automáticos: los mensajes rechazados permanecen en ellas hasta que se revisen y eliminen manualmente. Los consumidores de las colas principales registran el error antes de enviar el mensaje a la DLQ. Para inspeccionar un mensaje desde RabbitMQ Management, abre la cola DLQ y usa **Get messages** con requeue habilitado para no retirarlo de forma permanente. Después de revisarlo, confirma/elimina el mensaje desde el panel. Esta política no aplica expiración automática; monitorea el crecimiento de las DLQ y límpialas periódicamente.
 
 Para crear EC2 con acceso SSH, define `ec2_key_name` en `terraform.tfvars` con el nombre de un key pair existente en la región configurada. Si no lo necesitas, déjalo vacío; la instancia se creará sin key pair.
 

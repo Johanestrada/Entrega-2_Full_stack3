@@ -4,6 +4,7 @@ import com.colegio.asistenciaservice.controller.AsistenciaController;
 import com.colegio.asistenciaservice.model.Asistencia;
 import com.colegio.asistenciaservice.repository.AsistenciaRepository;
 import com.colegio.asistenciaservice.service.AsistenciaService;
+import com.colegio.asistenciaservice.service.AsistenciaEventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +41,9 @@ class AsistenciaServiceApplicationTests {
 
 	@MockBean
 	private AsistenciaRepository asistenciaRepository;
+
+	@MockBean
+	private AsistenciaEventPublisher asistenciaEventPublisher;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -134,6 +138,7 @@ class AsistenciaServiceApplicationTests {
 				.andExpect(jsonPath("$.presente", is(true)));
 
 		verify(asistenciaRepository, times(1)).save(any(Asistencia.class));
+		verify(asistenciaEventPublisher, times(1)).publicarAsistenciaRegistrada(response);
 	}
 
 	@Test

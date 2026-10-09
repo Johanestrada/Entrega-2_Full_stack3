@@ -4,6 +4,7 @@ import com.colegio.evaluacionService.controller.EvaluacionController;
 import com.colegio.evaluacionService.model.Evaluacion;
 import com.colegio.evaluacionService.repository.EvaluacionRepository;
 import com.colegio.evaluacionService.service.EvaluacionService;
+import com.colegio.evaluacionService.service.EvaluacionEventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +41,9 @@ class EvaluacionServiceApplicationTests {
 
 	@MockBean
 	private EvaluacionRepository evaluacionRepository;
+
+	@MockBean
+	private EvaluacionEventPublisher evaluacionEventPublisher;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -112,6 +116,8 @@ class EvaluacionServiceApplicationTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id", is(10)))
 				.andExpect(jsonPath("$.materia", is("Matemáticas")));
+
+		verify(evaluacionEventPublisher).publicarEvaluacionCalificada(ev);
 	}
 
 	@Test

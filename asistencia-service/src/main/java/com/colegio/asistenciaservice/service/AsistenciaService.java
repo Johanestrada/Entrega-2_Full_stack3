@@ -2,6 +2,9 @@ package com.colegio.asistenciaservice.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.stereotype.Service;
 
 import com.colegio.asistenciaservice.model.Asistencia;
@@ -10,10 +13,14 @@ import com.colegio.asistenciaservice.repository.AsistenciaRepository;
 @Service
 public class AsistenciaService {
 
-    private final AsistenciaRepository repository;
+    private static final Logger log = LoggerFactory.getLogger(AsistenciaService.class);
 
-    public AsistenciaService(AsistenciaRepository repository) {
+    private final AsistenciaRepository repository;
+    private final AsistenciaEventPublisher eventPublisher;
+
+    public AsistenciaService(AsistenciaRepository repository, AsistenciaEventPublisher eventPublisher) {
         this.repository = repository;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<Asistencia> listar() {
@@ -21,7 +28,14 @@ public class AsistenciaService {
     }
 
     public Asistencia guardar(Asistencia asistencia) {
-        return repository.save(asistencia);
+        Asistencia guardada = repository.save(asistencia);
+        try {
+            eventPublisher.publicarAsistenciaRegistrada(guardada);
+        } catch (AmqpException e) {
+            log.error("La asistencia id={} quedó guardada, pero no se pudo publicar asistencia.registrada.",
+                    guardada.getId(), e);
+        }
+        return guardada;
     }
 
     public Asistencia obtenerPorId(Long id) {

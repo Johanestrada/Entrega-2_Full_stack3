@@ -2,6 +2,9 @@ package com.colegio.evaluacionService.service;
 
 import java.util.List;
 
+import org.springframework.amqp.AmqpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +14,16 @@ import com.colegio.evaluacionService.repository.EvaluacionRepository;
 @Service
 public class EvaluacionService {
 
+    private static final Logger log = LoggerFactory.getLogger(EvaluacionService.class);
+
     @Autowired
     private EvaluacionRepository repository;
+
+    private final EvaluacionEventPublisher eventPublisher;
+
+    public EvaluacionService(EvaluacionEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     public Evaluacion guardar(String nombre, String materia, Double nota) {
         Evaluacion evaluacion = new Evaluacion();
@@ -24,7 +35,14 @@ public class EvaluacionService {
         }
         evaluacion.setMateria(materia);
         evaluacion.setNota(nota);
-        return repository.save(evaluacion);
+        Evaluacion guardada = repository.save(evaluacion);
+        try {
+            eventPublisher.publicarEvaluacionCalificada(guardada);
+        } catch (AmqpException e) {
+            log.error("La evaluación id={} quedó guardada, pero no se pudo publicar evaluacion.calificada.",
+                    guardada.getId(), e);
+        }
+        return guardada;
     }
 
     public List<Evaluacion> listar() {

@@ -28,10 +28,12 @@ public class AsistenciaService {
     }
 
     public Asistencia guardar(Asistencia asistencia) {
+        // Se guarda primero para que el evento incluya el identificador generado.
         Asistencia guardada = repository.save(asistencia);
         try {
             eventPublisher.publicarAsistenciaRegistrada(guardada);
         } catch (AmqpException e) {
+            // Un fallo de RabbitMQ no revierte el registro que ya quedó guardado.
             log.error("La asistencia id={} quedó guardada, pero no se pudo publicar asistencia.registrada.",
                     guardada.getId(), e);
         }

@@ -34,7 +34,9 @@ public class AsistenciaEventPublisher {
                 asistencia.getFecha(),
                 asistencia.isPresente() ? "PRESENTE" : "AUSENTE");
 
+        // Publica el evento en el exchange con la routing key configurada.
         rabbitTemplate.convertAndSend(exchange, routingKey, evento, message -> {
+            // Marca el mensaje como persistente en RabbitMQ.
             message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return message;
         });

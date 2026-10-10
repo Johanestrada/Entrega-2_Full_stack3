@@ -12,11 +12,13 @@ public class RabbitAdminConfig {
 
     @Bean
     public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        // Permite que la aplicación declare la topología en el broker.
         return new RabbitAdmin(connectionFactory);
     }
 
     @Bean
     public MessageConverter messageConverter() {
+        // Convierte los eventos entre objetos Java y mensajes JSON.
         return new Jackson2JsonMessageConverter();
     }
 }

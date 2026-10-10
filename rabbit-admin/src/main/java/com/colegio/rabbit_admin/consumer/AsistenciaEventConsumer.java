@@ -13,12 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AsistenciaEventConsumer {
 
-    /**
-     * Política de manejo de errores:
-     * - Exito: ACK manual y se confirma el mensaje.
-     * - Error no recuperable (IllegalArgumentException, JSON inválido/transformación fallida): NACK sin requeue hacia la DLQ.
-     * - Error recuperable (fallo temporal): una sola reintento con requeue=true; si ya fue redelivered, se envía a DLQ.
-     */
+    // Escucha los eventos de asistencia en la cola configurada.
     @RabbitListener(queues = "${rabbitmq.queue.asistencia}")
     public void consumirEventoAsistencia(
             EventoAsistencia evento,
@@ -32,10 +27,12 @@ public class AsistenciaEventConsumer {
 
             procesarEventoAsistencia(evento);
 
+            // Confirma el mensaje después de completar el procesamiento.
             channel.basicAck(tag, false);
             log.info("✅ Mensaje confirmado: {}", evento.getId());
 
         } catch (IllegalArgumentException | MessageConversionException e) {
+            // Un evento inválido se rechaza sin requeue para enviarlo a la DLQ.
             log.error("❌ Error no recuperable procesando evento de Asistencia: {}. Se envía a DLQ.", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
@@ -44,6 +41,7 @@ public class AsistenciaEventConsumer {
             }
         } catch (Exception e) {
             if (!redelivered) {
+                // En el primer fallo temporal, devuelve el mensaje a la cola para reintentar.
                 log.warn("⚠️ Fallo temporal en evento de Asistencia: {}. Se reintenta una sola vez.", evento.getId(), e);
                 try {
                     channel.basicNack(tag, false, true);
@@ -53,6 +51,7 @@ public class AsistenciaEventConsumer {
                 return;
             }
 
+            // Si ya fue reentregado, lo rechaza sin requeue para enviarlo a la DLQ.
             log.error("❌ Evento de Asistencia ya reintentado y sigue fallando. Se envía a DLQ: {}", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
@@ -62,6 +61,7 @@ public class AsistenciaEventConsumer {
         }
     }
 
+    // Valida los campos básicos y registra el evento; no ejecuta otra operación de negocio.
     private void procesarEventoAsistencia(EventoAsistencia evento) {
         if (evento == null) {
             throw new IllegalArgumentException("El evento de asistencia no puede ser nulo");

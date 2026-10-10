@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class AsistenciaRegistradaEvent {
 
+    // Metadatos del evento y datos de la asistencia enviados al consumidor.
     private String id;
     private String tipo;
     private LocalDateTime timestamp;

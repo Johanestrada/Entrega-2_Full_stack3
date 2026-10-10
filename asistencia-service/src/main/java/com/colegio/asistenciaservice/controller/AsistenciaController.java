@@ -44,6 +44,7 @@ public class AsistenciaController {
         return service.listarPorEstudiante(String.valueOf(estudianteId));
     }
 
+    // Recibe el registro de asistencia enviado por el cliente REST.
     @PostMapping
     public Asistencia guardar(@RequestBody Asistencia asistencia) {
         if (asistencia.getEstudianteId() == null) {
@@ -67,4 +68,3 @@ public class AsistenciaController {
         service.eliminar(id);
     }
 }
-

@@ -50,18 +50,19 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing.dlq.evaluacion}")
     private String evaluacionDlqRoutingKey;
 
-    // === EXCHANGES ===
+    // Exchange compartido que distribuye eventos por patrón de routing key.
     @Bean
     public TopicExchange eventosExchange() {
         return new TopicExchange(eventosExchange, true, false);
     }
 
+    // Exchange que enruta los mensajes rechazados hacia su DLQ.
     @Bean
     public DirectExchange dlxExchange() {
         return new DirectExchange(dlxExchange, true, false);
     }
 
-    // === MAIN QUEUES ===
+    // Cola durable de estudiantes; es la única declarada como Quorum.
     @Bean
     public Queue estudianteQueue() {
         return QueueBuilder.durable(estudianteQueue)
@@ -71,6 +72,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
+    // Cola durable con una ruta de dead-lettering para mensajes rechazados.
     @Bean
     public Queue asistenciaQueue() {
         return QueueBuilder.durable(asistenciaQueue)
@@ -79,6 +81,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
+    // Cola durable con una ruta de dead-lettering para mensajes rechazados.
     @Bean
     public Queue evaluacionQueue() {
         return QueueBuilder.durable(evaluacionQueue)
@@ -87,7 +90,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
-    // === DEAD LETTER QUEUES ===
+    // Colas durables que conservan los mensajes enviados al exchange de dead-lettering.
     @Bean
     public Queue estudianteDLQ() {
         return QueueBuilder.durable(estudianteDlq).build();
@@ -103,7 +106,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(evaluacionDlq).build();
     }
 
-    // === BINDINGS ===
+    // Cada binding conecta una cola principal al exchange con el patrón de su dominio.
     @Bean
     public Binding estudianteBinding(Queue estudianteQueue, TopicExchange eventosExchange) {
         return BindingBuilder.bind(estudianteQueue)
@@ -125,7 +128,7 @@ public class RabbitMQConfig {
                 .with(evaluacionRoutingKey);
     }
 
-    // === DLQ BINDINGS ===
+    // Estos bindings conectan cada routing key de dead-lettering con su DLQ.
     @Bean
     public Binding estudianteDLQBinding(Queue estudianteDLQ, DirectExchange dlxExchange) {
         return BindingBuilder.bind(estudianteDLQ)

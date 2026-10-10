@@ -13,12 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EvaluacionEventConsumer {
 
-    /**
-     * Política de manejo de errores:
-     * - Exito: ACK manual y se confirma el mensaje.
-     * - Error no recuperable (IllegalArgumentException, JSON inválido/transformación fallida): NACK sin requeue hacia la DLQ.
-     * - Error recuperable (fallo temporal): una sola reintento con requeue=true; si ya fue redelivered, se envía a DLQ.
-     */
+    // Escucha los eventos publicados en la cola de evaluaciones.
     @RabbitListener(queues = "${rabbitmq.queue.evaluacion}")
     public void consumirEventoEvaluacion(
             EventoEvaluacion evento,
@@ -32,10 +27,12 @@ public class EvaluacionEventConsumer {
 
             procesarEventoEvaluacion(evento);
 
+            // Confirma el mensaje cuando termina el procesamiento.
             channel.basicAck(tag, false);
             log.info("✅ Mensaje confirmado: {}", evento.getId());
 
         } catch (IllegalArgumentException | MessageConversionException e) {
+            // Rechaza los mensajes inválidos sin requeue para que lleguen a la DLQ.
             log.error("❌ Error no recuperable procesando evento de Evaluación: {}. Se envía a DLQ.", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
@@ -44,6 +41,7 @@ public class EvaluacionEventConsumer {
             }
         } catch (Exception e) {
             if (!redelivered) {
+                // Devuelve a la cola el mensaje que tuvo un fallo temporal por primera vez.
                 log.warn("⚠️ Fallo temporal en evento de Evaluación: {}. Se reintenta una sola vez.", evento.getId(), e);
                 try {
                     channel.basicNack(tag, false, true);
@@ -53,6 +51,7 @@ public class EvaluacionEventConsumer {
                 return;
             }
 
+            // Si el mensaje ya fue reintentado, lo rechaza y lo envía a la DLQ.
             log.error("❌ Evento de Evaluación ya reintentado y sigue fallando. Se envía a DLQ: {}", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
@@ -62,6 +61,7 @@ public class EvaluacionEventConsumer {
         }
     }
 
+    // Valida que el evento y su identificador estén presentes antes de aceptarlo.
     private void procesarEventoEvaluacion(EventoEvaluacion evento) {
         if (evento == null) {
             throw new IllegalArgumentException("El evento de evaluación no puede ser nulo");

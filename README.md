@@ -15,17 +15,17 @@ Para ejecutar sólo los tests principales de integración/E2E:
 .\mvnw test "-Dtest=AcademicoIntegrationTest,AcademicoE2ETest,BffServiceApplicationTests"
 ```
 
-## Documentación y entregables
+## Documentación disponible
 
-La carpeta `documentation/` contiene los documentos de entrega requeridos:
+La carpeta `documentation/` contiene los siguientes documentos y recursos:
 
 - `Descripcion_Persistencia.pdf`
 - `Informe_Pruebas_Unitarias.pdf`
 - `API_REST_Especificacion.pdf`
-- `video_checklist.md`
+- `Diagrama_Arquitectura.png`
 - `repositorios.txt`
 
-Conviene incluir los `.pdf` en la entrega y verificar que estén actualizados.
+Incluye en la entrega los archivos que solicite la pauta y verifica que correspondan a la versión final del proyecto.
 
 # Proyecto Colegio Bernardo O'Higgins
 

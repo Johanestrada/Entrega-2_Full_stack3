@@ -41,7 +41,12 @@ variable "enable_cloudfront" {
 }
 variable "admin_cidr" {
   type        = string
-  description = "CIDR permitido para SSH y acceso temporal al panel RabbitMQ; vacío deshabilita ambos."
+  description = "CIDR permitido para SSH; vacío deshabilita el acceso SSH."
+  default     = ""
+}
+variable "rabbitmq_admin_cidr" {
+  type        = string
+  description = "CIDR permitido para el panel RabbitMQ; vacío deshabilita el acceso."
   default     = ""
 }
 variable "image_prefix" {

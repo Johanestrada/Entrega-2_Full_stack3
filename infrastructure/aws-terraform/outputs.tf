@@ -1,6 +1,6 @@
 output "dns_publico_ec2" {
   description = "DNS público de la instancia EC2."
-  value       = aws_instance.app.public_dns
+  value       = aws_eip.app.public_dns
 }
 
 output "url_frontend" {
@@ -10,12 +10,17 @@ output "url_frontend" {
 
 output "url_frontend_ec2" {
   description = "URL HTTP directa de diagnóstico de la EC2."
-  value       = "http://${aws_instance.app.public_dns}"
+  value       = "http://${aws_eip.app.public_dns}"
 }
 
 output "url_panel_rabbitmq" {
   description = "URL del panel de administración RabbitMQ (accesible solo desde admin_cidr)."
-  value       = "http://${aws_instance.app.public_dns}:15672"
+  value       = "http://${aws_eip.app.public_dns}:15672"
+}
+
+output "ip_estatica_ec2" {
+  description = "Elastic IP asociada a la instancia EC2."
+  value       = aws_eip.app.public_ip
 }
 
 output "endpoint_api_gateway" {

@@ -5,8 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.kafka.KafkaException;
 import org.springframework.stereotype.Service;
 
+import com.colegio.asistenciaservice.event.AsistenciaEvent;
 import com.colegio.asistenciaservice.model.Asistencia;
 import com.colegio.asistenciaservice.repository.AsistenciaRepository;
 
@@ -17,10 +19,13 @@ public class AsistenciaService {
 
     private final AsistenciaRepository repository;
     private final AsistenciaEventPublisher eventPublisher;
+    private final AsistenciaKafkaProducer asistenciaKafkaProducer;
 
-    public AsistenciaService(AsistenciaRepository repository, AsistenciaEventPublisher eventPublisher) {
+    public AsistenciaService(AsistenciaRepository repository, AsistenciaEventPublisher eventPublisher,
+                            AsistenciaKafkaProducer asistenciaKafkaProducer) {
         this.repository = repository;
         this.eventPublisher = eventPublisher;
+        this.asistenciaKafkaProducer = asistenciaKafkaProducer;
     }
 
     public List<Asistencia> listar() {
@@ -32,9 +37,16 @@ public class AsistenciaService {
         Asistencia guardada = repository.save(asistencia);
         try {
             eventPublisher.publicarAsistenciaRegistrada(guardada);
-        } catch (AmqpException e) {
-            // Un fallo de RabbitMQ no revierte el registro que ya quedó guardado.
-            log.error("La asistencia id={} quedó guardada, pero no se pudo publicar asistencia.registrada.",
+            if (guardada.getEstudianteId() != null) {
+                AsistenciaEvent evento = new AsistenciaEvent(
+                        guardada.getId(),
+                        guardada.getEstudianteId(),
+                        guardada.getFecha(),
+                        guardada.isPresente() ? "PRESENTE" : "AUSENTE");
+                asistenciaKafkaProducer.publicarAsistencia(evento);
+            }
+        } catch (AmqpException | KafkaException e) {
+            log.error("La asistencia id={} quedó guardada, pero no se pudo publicar el evento Kafka/Rabbit.",
                     guardada.getId(), e);
         }
         return guardada;

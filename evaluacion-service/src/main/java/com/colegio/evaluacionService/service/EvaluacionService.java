@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.colegio.evaluacionService.event.NotaEvent;
 import com.colegio.evaluacionService.model.Evaluacion;
 import com.colegio.evaluacionService.repository.EvaluacionRepository;
+import org.springframework.kafka.KafkaException;
 
 @Service
 public class EvaluacionService {
@@ -20,9 +22,11 @@ public class EvaluacionService {
     private EvaluacionRepository repository;
 
     private final EvaluacionEventPublisher eventPublisher;
+    private final NotaKafkaProducer notaKafkaProducer;
 
-    public EvaluacionService(EvaluacionEventPublisher eventPublisher) {
+    public EvaluacionService(EvaluacionEventPublisher eventPublisher, NotaKafkaProducer notaKafkaProducer) {
         this.eventPublisher = eventPublisher;
+        this.notaKafkaProducer = notaKafkaProducer;
     }
 
     public Evaluacion guardar(String nombre, String materia, Double nota) {
@@ -38,8 +42,16 @@ public class EvaluacionService {
         Evaluacion guardada = repository.save(evaluacion);
         try {
             eventPublisher.publicarEvaluacionCalificada(guardada);
-        } catch (AmqpException e) {
-            log.error("La evaluación id={} quedó guardada, pero no se pudo publicar evaluacion.calificada.",
+            if (guardada.getEstudianteId() != null) {
+                NotaEvent evento = new NotaEvent(
+                        guardada.getId(),
+                        guardada.getEstudianteId(),
+                        guardada.getMateria(),
+                        guardada.getNota());
+                notaKafkaProducer.publicarNota(evento);
+            }
+        } catch (AmqpException | KafkaException e) {
+            log.error("La evaluación id={} quedó guardada, pero no se pudo publicar el evento Kafka/Rabbit.",
                     guardada.getId(), e);
         }
         return guardada;

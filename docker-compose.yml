@@ -225,10 +225,26 @@ services:
     networks:
       - rabbitmq-cluster
 
+  kafka-admin:
+    image: ${IMAGE_PREFIX}kafka-admin:${IMAGE_TAG}
+    build: ./kafka-admin
+    ports:
+      - '8086:8086'
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - kafka-network
+
 networks:
   rabbitmq-cluster:
     driver: bridge
   default:
+    driver: bridge
+  kafka-network:
     driver: bridge
 
 volumes:

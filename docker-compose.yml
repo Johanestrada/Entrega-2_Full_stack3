@@ -1,3 +1,7 @@
+include:
+  - path: docker-compose.kafka.yml
+  - path: docker-compose.kafka-ui.yml
+
 services:
   rabbitmq-1:
     container_name: rabbitmq-1
@@ -48,7 +52,7 @@ services:
   mysql:
     image: mysql:8.4
     ports:
-      - '3306:3306'
+      - '127.0.0.1:3306:3306'
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-colegio}
@@ -64,13 +68,13 @@ services:
       start_period: 30s
 
   eureka-server:
-    image: ${IMAGE_PREFIX}eureka-server:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}eureka-server:${IMAGE_TAG:-latest}
     build: ./eureka-server
     ports:
       - '8761:8761'
 
   estudiante-service:
-    image: ${IMAGE_PREFIX}estudiante-service:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}estudiante-service:${IMAGE_TAG:-latest}
     build: ./estudiante-service
     ports:
       - '8081:8081'
@@ -79,10 +83,8 @@ services:
         condition: service_started
       mysql:
         condition: service_healthy
-      rabbitmq-1:
-        condition: service_healthy
-      rabbitmq-2:
-        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://eureka-server:8761/eureka}
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
@@ -95,68 +97,70 @@ services:
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-colegio_app}
       SPRING_RABBITMQ_CONNECTION_TIMEOUT: 10s
       SPRING_RABBITMQ_REQUESTED_HEARTBEAT: 30s
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:19092,kafka-2:19093,kafka-3:19094}
     networks:
       - default
       - rabbitmq-cluster
+      - kafka-network
 
   asistencia-service:
-    image: ${IMAGE_PREFIX}asistencia-service:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}asistencia-service:${IMAGE_TAG:-latest}
     build: ./asistencia-service
     ports:
       - '8082:8082'
     depends_on:
       eureka-server:
         condition: service_started
-      rabbitmq-1:
-        condition: service_healthy
-      rabbitmq-2:
-        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
-      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL:-http://eureka-server:8761/eureka}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-user}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-change-me}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.MySQL8Dialect}
       - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:19092,kafka-2:19093,kafka-3:19094}
     networks:
       - default
       - rabbitmq-cluster
+      - kafka-network
 
   evaluacion-service:
-    image: ${IMAGE_PREFIX}evaluacion-service:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}evaluacion-service:${IMAGE_TAG:-latest}
     build: ./evaluacion-service
     ports:
       - '8083:8083'
     depends_on:
       eureka-server:
         condition: service_started
-      rabbitmq-1:
-        condition: service_healthy
-      rabbitmq-2:
-        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
-      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL:-http://eureka-server:8761/eureka}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-user}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-change-me}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.MySQL8Dialect}
       - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
       - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
       - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:19092,kafka-2:19093,kafka-3:19094}
     networks:
       - default
       - rabbitmq-cluster
+      - kafka-network
 
   bff-service:
-    image: ${IMAGE_PREFIX}bff-service:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}bff-service:${IMAGE_TAG:-latest}
     build: ./bff-service
     ports:
       - '8084:8084'
@@ -169,41 +173,32 @@ services:
         condition: service_started
       evaluacion-service:
         condition: service_started
-      rabbitmq-1:
-        condition: service_healthy
-      rabbitmq-2:
-        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
-      - ESTUDIANTE_SERVICE_URL=${ESTUDIANTE_SERVICE_URL}
-      - ASISTENCIA_SERVICE_URL=${ASISTENCIA_SERVICE_URL}
-      - EVALUACION_SERVICE_URL=${EVALUACION_SERVICE_URL}
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
-      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
-      - JWT_ISSUER_URI=${JWT_ISSUER_URI}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - SPRING_RABBITMQ_ADDRESSES=rabbitmq-1:5672,rabbitmq-2:5672
-      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-colegio_app}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-colegio_app}
-      - SPRING_RABBITMQ_CONNECTION_TIMEOUT=10s
-      - SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30s
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL:-http://eureka-server:8761/eureka}
+      - ESTUDIANTE_SERVICE_URL=${ESTUDIANTE_SERVICE_URL:-http://estudiante-service:8081}
+      - ASISTENCIA_SERVICE_URL=${ASISTENCIA_SERVICE_URL:-http://asistencia-service:8082}
+      - EVALUACION_SERVICE_URL=${EVALUACION_SERVICE_URL:-http://evaluacion-service:8083}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-user}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-change-me}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.MySQL8Dialect}
+      - JWT_ISSUER_URI=${JWT_ISSUER_URI:-https://login.microsoftonline.com/YOUR_TENANT_ID/v2.0}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:-YOUR_API_CLIENT_ID}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:4173}
 
   frontend:
-    image: ${IMAGE_PREFIX}frontend:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend-angular
     ports:
       - '4173:80'
     environment:
-      - API_BASE_URL=${API_BASE_URL}
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8084}
 
   rabbit-admin:
-    image: ${IMAGE_PREFIX}rabbit-admin:${IMAGE_TAG}
+    image: ${IMAGE_PREFIX:-}rabbit-admin:${IMAGE_TAG:-latest}
     build: ./rabbit-admin
     ports:
       - '8085:8085'
@@ -225,10 +220,30 @@ services:
     networks:
       - rabbitmq-cluster
 
+  kafka-admin:
+    image: ${IMAGE_PREFIX:-}kafka-admin:${IMAGE_TAG:-latest}
+    build: ./kafka-admin
+    ports:
+      - '${KAFKA_ADMIN_BIND_IP:-127.0.0.1}:8086:8086'
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:19092,kafka-2:19093,kafka-3:19094}
+    networks:
+      - kafka-network
+
 networks:
   rabbitmq-cluster:
     driver: bridge
   default:
+    driver: bridge
+  kafka-network:
+    name: ${KAFKA_NETWORK_NAME:-colegio-kafka-network}
     driver: bridge
 
 volumes:

@@ -83,6 +83,21 @@ Plataforma académica Angular y Spring Boot para gestionar estudiantes, asistenc
    npm start
    ```
 
+### Ejecutar el stack integrado con Docker Compose
+
+El Compose principal incluye RabbitMQ, Kafka, Kafka UI y los microservicios. Los valores locales tienen defaults para levantar el stack sin configurar imágenes publicadas. Copia `.env.example` a `.env` y reemplaza los marcadores `YOUR_TENANT_ID` y `YOUR_API_CLIENT_ID` con los datos de tu registro Entra ID; sin esos valores el BFF no puede iniciar, porque valida el emisor JWT al arrancar. Compose crea automáticamente la red Kafka:
+
+```bash
+cp .env.example .env
+# Edita .env con los valores locales y de Entra ID.
+docker compose up --build -d
+docker compose ps
+```
+
+Los brokers y nodos ZooKeeper publican sus puertos de diagnóstico sólo en `127.0.0.1`. Kafka UI también queda local en `http://localhost:8090`; el puerto del servicio Kafka Admin (8086) está protegido de igual manera. Los contenedores se comunican por `colegio-kafka-network`, usando `kafka-1:19092`, `kafka-2:19093` y `kafka-3:19094`.
+
+Al iniciar, un contenedor de una sola ejecución espera a que los brokers estén saludables y crea los seis tópicos; que ese contenedor termine con código 0 es normal. Los tópicos principales son `estudiantes.eventos`, `asistencia.eventos` y `calificaciones.eventos`, todos con 3 particiones y factor de réplica 3. Cada uno tiene un tópico `.DLT` con 3 particiones para conservar la partición de origen. El servicio de estudiantes publica los eventos de creación en `estudiantes.eventos`; el grupo `analitica-academica` consume los tres tópicos y actualiza las métricas de alumnos, asistencia y calificaciones. El grupo `estudiante-notificaciones` sigue consumiendo asistencia y calificaciones. El endpoint de analítica se publica desde `estudiante-service` en el puerto 8081. El estado agregado de analítica se guarda en memoria y se reinicia junto con ese servicio.
+
 ## Autenticación y seguridad
 
 - Angular usa Microsoft Entra ID mediante `@azure/msal-angular`.
@@ -106,6 +121,12 @@ RabbitMQ se ejecuta como contenedor en la EC2, persiste sus datos en el volumen 
 No abras el puerto a `0.0.0.0/0`. `admin_cidr` también limita SSH; si tu IP cambia, actualiza esa variable antes de aplicar Terraform. Define una contraseña de RabbitMQ de entre 6 y 128 caracteres usando solo letras, números, `-` o `_`. Para la práctica puedes usar `123456`, aunque es una contraseña débil y no se recomienda fuera de un entorno académico aislado. Terraform la recibe mediante `TF_VAR_rabbitmq_password`; también puedes definir `rabbitmq_username` en `terraform.tfvars` si cambias el usuario por defecto `colegio_app`. El valor queda en el estado de Terraform y en la configuración de arranque de EC2, por lo que protege también ese estado y restringe el acceso administrativo a la instancia.
 
 Las colas `eventos.*.dlq` son durables y no tienen consumidores automáticos: los mensajes rechazados permanecen en ellas hasta que se revisen y eliminen manualmente. Los consumidores de las colas principales registran el error antes de enviar el mensaje a la DLQ. Para inspeccionar un mensaje desde RabbitMQ Management, abre la cola DLQ y usa **Get messages** con requeue habilitado para no retirarlo de forma permanente. Después de revisarlo, confirma/elimina el mensaje desde el panel. Esta política no aplica expiración automática; monitorea el crecimiento de las DLQ y límpialas periódicamente.
+
+### Kafka en AWS
+
+El bootstrap de EC2 inicia también los tres ZooKeeper, los tres brokers Kafka, Kafka UI y Kafka Admin desde el mismo Compose integrado. Kafka UI y la API Kafka Admin no se exponen públicamente: con acceso SSH habilitado se pueden revisar mediante túneles, por ejemplo `ssh -L 8090:localhost:8090 -L 8086:localhost:8086 ec2-user@<dns-publico-ec2>`, y luego abrir `http://localhost:8090` o `http://localhost:8086`.
+
+La topología de tres brokers y tres ZooKeeper dentro de una única EC2 no constituye alta disponibilidad ante la pérdida de esa instancia. Además, el tipo EC2 predeterminado (`t3.medium`) puede quedarse corto de memoria al ejecutar simultáneamente todo el stack; dimensiona la instancia para la carga completa antes de afirmar que el despliegue cloud fue probado. Los POST persisten el registro aunque un publicador RabbitMQ o Kafka falle, y el fallo de uno de esos brokers ya no impide intentar la publicación al otro; no hay outbox transaccional, por lo que un fallo de publicación puede dejar el evento sin entregar.
 
 Para crear EC2 con acceso SSH, define `ec2_key_name` en `terraform.tfvars` con el nombre de un key pair existente en la región configurada. Si no lo necesitas, déjalo vacío; la instancia se creará sin key pair.
 

@@ -93,6 +93,16 @@ jobs:
             ghcr.io/${{ steps.meta.outputs.repo_slug }}-rabbit-admin:${{ steps.meta.outputs.sha_tag }}
             ghcr.io/${{ steps.meta.outputs.repo_slug }}-rabbit-admin:latest
 
+      - name: Build and push kafka-admin
+        uses: docker/build-push-action@v4
+        with:
+          context: ./kafka-admin
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-kafka-admin:${{ steps.meta.outputs.branch_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-kafka-admin:${{ steps.meta.outputs.sha_tag }}
+            ghcr.io/${{ steps.meta.outputs.repo_slug }}-kafka-admin:latest
+
       - name: Build and push frontend
         uses: docker/build-push-action@v4
         with:

@@ -1,13 +1,14 @@
 package com.colegio.evaluacionService.service;
 
-import com.colegio.evaluacionService.event.EvaluacionCalificadaEvent;
-import com.colegio.evaluacionService.model.Evaluacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.colegio.evaluacionService.event.EvaluacionCalificadaEvent;
+import com.colegio.evaluacionService.model.Evaluacion;
 
 @Service
 public class EvaluacionEventPublisher {
@@ -40,5 +41,6 @@ public class EvaluacionEventPublisher {
         });
         log.info("Evento evaluacion.calificada publicado en exchange={} routingKey={} evaluacionId={}",
                 exchange, routingKey, evaluacion.getId());
+                // la key de routing es "evento.evaluacion.calificada" y el exchange es "eventos.exchange"
     }
 }

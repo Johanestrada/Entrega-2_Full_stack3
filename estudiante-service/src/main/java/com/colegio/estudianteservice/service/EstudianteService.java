@@ -2,6 +2,7 @@ package com.colegio.estudianteservice.service;
 
 import java.util.List;
 
+import com.colegio.estudianteservice.event.EstudianteCreadoEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class EstudianteService {
 
     @Autowired(required = false)
     private EstudianteEventPublisher estudianteEventPublisher;
+
+    @Autowired(required = false)
+    private EstudianteKafkaProducer estudianteKafkaProducer;
 
     public List<Estudiante> getAll() {
         return estudianteRepository.findAll();
@@ -47,6 +51,25 @@ public class EstudianteService {
                             "El estudiante ya quedó persistido en MySQL y se devuelve la respuesta normal.",
                     estudiantePersistido.getId(),
                     estudiantePersistido.getNombre(),
+                    ex
+            );
+        }
+
+        try {
+            if (estudianteKafkaProducer != null) {
+                estudianteKafkaProducer.publicarEstudianteCreado(
+                        new EstudianteCreadoEvent(
+                                estudiantePersistido.getId(),
+                                estudiantePersistido.getNombre(),
+                                estudiantePersistido.getCurso()
+                        )
+                );
+            }
+        } catch (Exception ex) {
+            log.error(
+                    "Kafka falló al publicar estudiante.creado para id={}. " +
+                            "El estudiante ya quedó persistido en MySQL y se devuelve la respuesta normal.",
+                    estudiantePersistido.getId(),
                     ex
             );
         }

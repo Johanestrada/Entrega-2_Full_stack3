@@ -75,16 +75,34 @@ API_BASE_URL=${api_url}
 RABBITMQ_USERNAME=${rabbit_username}
 RABBITMQ_PASSWORD=${rabbit_password}
 RABBITMQ_MANAGEMENT_BIND_IP=0.0.0.0
+KAFKA_NETWORK_NAME=colegio-kafka-network
+KAFKA_BOOTSTRAP_SERVERS=kafka-1:19092,kafka-2:19093,kafka-3:19094
 IMAGE_PREFIX=${image_prefix}
 IMAGE_TAG=${image_tag}
 EOF
 cat > docker-compose.override.yml <<'COMPOSE_OVERRIDE'
 services:
+  zookeeper-1:
+    restart: unless-stopped
+  zookeeper-2:
+    restart: unless-stopped
+  zookeeper-3:
+    restart: unless-stopped
+  kafka-1:
+    restart: unless-stopped
+  kafka-2:
+    restart: unless-stopped
+  kafka-3:
+    restart: unless-stopped
+  kafka-ui:
+    restart: unless-stopped
   rabbitmq-1:
     restart: unless-stopped
   rabbitmq-2:
     restart: unless-stopped
   rabbit-admin:
+    restart: unless-stopped
+  kafka-admin:
     restart: unless-stopped
   eureka-server:
     restart: unless-stopped
@@ -110,7 +128,7 @@ else
 		exit 1
 	fi
 	docker compose up -d --remove-orphans frontend
-	if ! docker compose build eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin; then
+	if ! docker compose build eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin kafka-admin; then
 		echo "No se pudieron construir las imagenes backend."
 		exit 1
 	fi
@@ -119,20 +137,20 @@ fi
 
 docker compose up -d --remove-orphans frontend
 
-docker compose up -d --remove-orphans rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+docker compose up -d --remove-orphans
 for attempt in {1..12}; do
-	backend_containers=$(docker compose ps --status running -q rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin | wc -l)
+	backend_containers=$(docker compose ps --status running -q rabbitmq-1 rabbitmq-2 zookeeper-1 zookeeper-2 zookeeper-3 kafka-1 kafka-2 kafka-3 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin kafka-admin | wc -l)
 	ready_services=0
-	for port in 8761 8081 8082 8083 8084 8085; do
+	for port in 8761 8081 8082 8083 8084 8085 8086; do
 		status=$(curl -s -o /dev/null -w "%%{http_code}" --max-time 3 "http://localhost:$port" || true)
 		if [ "$status" != "000" ]; then
 			ready_services=$((ready_services + 1))
 		fi
 	done
-	if [ "$backend_containers" -ge 8 ] && [ "$ready_services" -ge 6 ]; then
+	if [ "$backend_containers" -ge 15 ] && [ "$ready_services" -ge 7 ]; then
 		break
 	fi
-	docker compose up -d --remove-orphans rabbitmq-1 rabbitmq-2 eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin
+	docker compose up -d --remove-orphans
 	sleep 10
 done
 docker compose ps

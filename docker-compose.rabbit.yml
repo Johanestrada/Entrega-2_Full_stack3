@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  rabbitmq-1:
+    container_name: rabbitmq-1
+    hostname: rabbitmq-1
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "${RABBITMQ_MANAGEMENT_BIND_IP:-127.0.0.1}:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-colegio_app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-colegio_app}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-rabbitmq-cluster-cookie}
+    volumes:
+      - rabbitmq1_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    networks:
+      - colegio-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  rabbitmq-2:
+    container_name: rabbitmq-2
+    hostname: rabbitmq-2
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "127.0.0.1:15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-colegio_app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-colegio_app}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-rabbitmq-cluster-cookie}
+    volumes:
+      - rabbitmq2_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    networks:
+      - colegio-network
+    depends_on:
+      rabbitmq-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+networks:
+  colegio-network:
+    name: colegio-network
+    external: true
+
+volumes:
+  rabbitmq1_data:
+  rabbitmq2_data:

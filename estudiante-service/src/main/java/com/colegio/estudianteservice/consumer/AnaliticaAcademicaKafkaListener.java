@@ -1,6 +1,7 @@
 package com.colegio.estudianteservice.consumer;
 
 import com.colegio.estudianteservice.event.AsistenciaEvent;
+import com.colegio.estudianteservice.event.EstudianteCreadoEvent;
 import com.colegio.estudianteservice.event.NotaEvent;
 import com.colegio.estudianteservice.service.AnaliticaAcademicaService;
 import jakarta.validation.Valid;
@@ -20,6 +21,26 @@ public class AnaliticaAcademicaKafkaListener {
 
     public AnaliticaAcademicaKafkaListener(AnaliticaAcademicaService analiticaAcademicaService) {
         this.analiticaAcademicaService = analiticaAcademicaService;
+    }
+
+    @KafkaListener(
+            topics = "${kafka.topic.estudiante.name}",
+            groupId = "${kafka.consumer.analytics.group-id}",
+            containerFactory = "kafkaListenerContainerFactory"
+    )
+    public void escucharEstudiante(@Payload EstudianteCreadoEvent evento, Acknowledgment acknowledgment) {
+        if (evento == null || evento.getId() == null) {
+            throw new IllegalArgumentException("Payload de estudiante inválido: id es obligatorio");
+        }
+
+        try {
+            log.info("📊 analitica-academica recibió estudiante creado id={}", evento.getId());
+            analiticaAcademicaService.registrarEstudiante(evento);
+            acknowledgment.acknowledge();
+        } catch (Exception ex) {
+            log.error("Error en analítica de estudiante id={}", evento.getId(), ex);
+            throw ex;
+        }
     }
 
     /**

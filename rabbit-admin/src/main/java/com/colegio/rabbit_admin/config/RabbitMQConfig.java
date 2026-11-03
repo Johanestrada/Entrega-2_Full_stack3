@@ -62,13 +62,13 @@ public class RabbitMQConfig {
         return new DirectExchange(dlxExchange, true, false);
     }
 
-    // Cola durable de estudiantes; es la única declarada como Quorum.
+    // Cola de estudiantes Quorum.
     @Bean
     public Queue estudianteQueue() {
         return QueueBuilder.durable(estudianteQueue)
-                .withArgument("x-queue-type", "quorum")
-                .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", estudianteDlqRoutingKey)
+                .withArgument("x-queue-type", "quorum") // Configura la cola como Quorum(replicar mensajes entre nodos RabbitMQ)
+                .withArgument("x-dead-letter-exchange", dlxExchange) // Configura la cola para enviar mensajes rechazados.
+                .withArgument("x-dead-letter-routing-key", estudianteDlqRoutingKey) // indica qué routing key usar para dirigir esos mensajes a la DLQ de estudiantes.
                 .build();
     }
 
@@ -90,7 +90,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
-    // Colas durables que conservan los mensajes enviados al exchange de dead-lettering.
+    // Colas durables que conservan los mensajes enviados al exchange de dead.
     @Bean
     public Queue estudianteDLQ() {
         return QueueBuilder.durable(estudianteDlq).build();
@@ -109,23 +109,23 @@ public class RabbitMQConfig {
     // Cada binding conecta una cola principal al exchange con el patrón de su dominio.
     @Bean
     public Binding estudianteBinding(Queue estudianteQueue, TopicExchange eventosExchange) {
-        return BindingBuilder.bind(estudianteQueue)
-                .to(eventosExchange)
-                .with(estudianteRoutingKey);
+        return BindingBuilder.bind(estudianteQueue) // Se enlaza la cola de estudiantes al exchange de eventos
+                .to(eventosExchange) // Se especifica el exchange al que se enlaza la cola.
+                .with(estudianteRoutingKey); // El patrón de routing key para la cola de estudiantes.
     }
 
     @Bean
     public Binding asistenciaBinding(Queue asistenciaQueue, TopicExchange eventosExchange) {
-        return BindingBuilder.bind(asistenciaQueue)
-                .to(eventosExchange)
-                .with(asistenciaRoutingKey);
+        return BindingBuilder.bind(asistenciaQueue) // Se enlaza la cola de asistencia al exchange de eventos
+                .to(eventosExchange) // Se especifica el exchange al que se enlaza la cola.
+                .with(asistenciaRoutingKey); // El patrón de routing key para la cola de asistencia.
     }
 
     @Bean
     public Binding evaluacionBinding(Queue evaluacionQueue, TopicExchange eventosExchange) {
-        return BindingBuilder.bind(evaluacionQueue)
+        return BindingBuilder.bind(evaluacionQueue) // Se enlaza la cola de evaluaciones al exchange de eventos
                 .to(eventosExchange)
-                .with(evaluacionRoutingKey);
+                .with(evaluacionRoutingKey); // El patrón de routing key para la cola de evaluaciones.
     }
 
     // Estos bindings conectan cada routing key de dead-lettering con su DLQ.

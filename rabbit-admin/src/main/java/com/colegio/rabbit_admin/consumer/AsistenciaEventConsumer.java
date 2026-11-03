@@ -14,35 +14,37 @@ import org.springframework.stereotype.Service;
 public class AsistenciaEventConsumer {
 
     // Escucha los eventos de asistencia en la cola configurada.
-    @RabbitListener(queues = "${rabbitmq.queue.asistencia}")
+    @RabbitListener(queues = "${rabbitmq.queue.asistencia}") // Se ESCUCHA a la cola de asistencia definida en application.properties
     public void consumirEventoAsistencia(
             EventoAsistencia evento,
             Channel channel,
             @Header(AmqpHeaders.DELIVERY_TAG) long tag,
             @Header(AmqpHeaders.REDELIVERED) boolean redelivered) {
+            // Maneja el evento de asistencia recibido, con control de errores y reintentos.
 
         try {
-            log.info("📨 Evento Asistencia recibido: {} - ID: {}", evento.getTipo(), evento.getId());
+            log.info("Evento Asistencia recibido: {} - ID: {}", evento.getTipo(), evento.getId());
             log.debug("Detalles: EstudianteID={}, Fecha={}, Estado={}", evento.getEstudianteId(), evento.getFecha(), evento.getEstado());
+            // Procesa el evento de asistencia; si hay un error, se lanzará una excepción.
 
-            procesarEventoAsistencia(evento);
+            procesarEventoAsistencia(evento); // Validación y registro del evento; no se realiza otra operación de negocio.
 
             // Confirma el mensaje después de completar el procesamiento.
-            channel.basicAck(tag, false);
-            log.info("✅ Mensaje confirmado: {}", evento.getId());
+            channel.basicAck(tag, false); // Confirma que el mensaje fue procesado correctamente y no debe ser reentregado.
+            log.info(" Mensaje confirmado: {}", evento.getId());
 
         } catch (IllegalArgumentException | MessageConversionException e) {
             // Un evento inválido se rechaza sin requeue para enviarlo a la DLQ.
-            log.error("❌ Error no recuperable procesando evento de Asistencia: {}. Se envía a DLQ.", evento.getId(), e);
+            log.error("Error no recuperable procesando evento de Asistencia: {}. Se envía a DLQ.", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
             } catch (Exception nackError) {
                 log.error("Error enviando a DLQ el evento de Asistencia: {}", evento.getId(), nackError);
             }
         } catch (Exception e) {
-            if (!redelivered) {
+            if (!redelivered) { // Si es la primera vez que falla, se reintenta una sola vez.
                 // En el primer fallo temporal, devuelve el mensaje a la cola para reintentar.
-                log.warn("⚠️ Fallo temporal en evento de Asistencia: {}. Se reintenta una sola vez.", evento.getId(), e);
+                log.warn("Fallo temporal en evento de Asistencia: {}. Se reintenta una sola vez.", evento.getId(), e);
                 try {
                     channel.basicNack(tag, false, true);
                 } catch (Exception nackError) {
@@ -52,7 +54,7 @@ public class AsistenciaEventConsumer {
             }
 
             // Si ya fue reentregado, lo rechaza sin requeue para enviarlo a la DLQ.
-            log.error("❌ Evento de Asistencia ya reintentado y sigue fallando. Se envía a DLQ: {}", evento.getId(), e);
+            log.error("Evento de Asistencia ya reintentado y sigue fallando. Se envía a DLQ: {}", evento.getId(), e);
             try {
                 channel.basicNack(tag, false, false);
             } catch (Exception nackError) {

@@ -27,7 +27,7 @@ public class DltKafkaListener {
     );
 
     @KafkaListener(
-            topics = "${kafka.topic.calificaciones.dlt.name:calificaciones.eventos.DLT},${kafka.topic.asistencia.dlt.name:asistencia.eventos.DLT}",
+            topics = "${kafka.topic.calificaciones.dlt.name:calificaciones.eventos.DLT},${kafka.topic.asistencia.dlt.name:asistencia.eventos.DLT},${kafka.topic.estudiante.dlt.name:estudiantes.eventos.DLT}",
             groupId = "${kafka.consumer.notifications.group-id}-dlt",
             containerFactory = "kafkaListenerContainerFactory"
     )

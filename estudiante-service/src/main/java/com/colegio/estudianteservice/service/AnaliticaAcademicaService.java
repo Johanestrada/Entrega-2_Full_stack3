@@ -1,6 +1,7 @@
 package com.colegio.estudianteservice.service;
 
 import com.colegio.estudianteservice.event.AsistenciaEvent;
+import com.colegio.estudianteservice.event.EstudianteCreadoEvent;
 import com.colegio.estudianteservice.event.NotaEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,6 +22,16 @@ public class AnaliticaAcademicaService {
     private final Map<Long, List<Double>> notasPorEstudiante = new ConcurrentHashMap<>();
     private final Map<Long, AtomicLong> presentesPorEstudiante = new ConcurrentHashMap<>();
     private final Map<Long, AtomicLong> totalAsistenciasPorEstudiante = new ConcurrentHashMap<>();
+    private final Set<Long> estudiantesRegistrados = ConcurrentHashMap.newKeySet();
+
+    public void registrarEstudiante(EstudianteCreadoEvent evento) {
+        if (evento == null || evento.getId() == null) {
+            log.warn("Evento de estudiante inválido para analítica: {}", evento);
+            return;
+        }
+
+        estudiantesRegistrados.add(evento.getId());
+    }
 
     public void registrarNota(NotaEvent evento) {
         if (evento == null || evento.getEstudianteId() == null || evento.getNota() == null) {
@@ -66,6 +78,7 @@ public class AnaliticaAcademicaService {
         resumen.put("tasaAsistenciaGlobal", Math.round(tasaAsistencia * 10000.0) / 10000.0);
         resumen.put("totalEventosNotas", notasPorEstudiante.values().stream().mapToLong(List::size).sum());
         resumen.put("totalEventosAsistencia", totalRegistrosAsistencia);
+        resumen.put("totalEstudiantesRegistrados", estudiantesRegistrados.size());
         resumen.put("promedioPorEstudiante", construirPromediosPorEstudiante());
         return resumen;
     }

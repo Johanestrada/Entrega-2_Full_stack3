@@ -46,8 +46,8 @@ public class KafkaTopicConfig {
     @Value("${kafka.topic.calificaciones.dlt.min.insync.replicas}")
     private short calificacionesDltMinInSyncReplicas;
 
-    // calificaciones.eventos tiene alta importancia analítica, por lo que se mantiene mayor retención
-    // (7 días) y más particiones (6) para distribuir la carga de eventos de nota/materia por estudiante.
+    // calificaciones.eventos conserva siete días de retención y tres particiones para balancear
+    // distribución, orden por estudiante y costo operativo.
     // El cleanup policy delete evita compresión innecesaria porque estos eventos son históricos y no se consultan
     // como estado mutable; se usa replica factor 3 y min.insync.replicas=2 para tolerar fallos sin perder durabilidad.
     @Bean

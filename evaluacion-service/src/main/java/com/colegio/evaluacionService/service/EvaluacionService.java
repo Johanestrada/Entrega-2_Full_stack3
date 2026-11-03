@@ -42,17 +42,22 @@ public class EvaluacionService {
         Evaluacion guardada = repository.save(evaluacion);
         try {
             eventPublisher.publicarEvaluacionCalificada(guardada);
-            if (guardada.getEstudianteId() != null) {
-                NotaEvent evento = new NotaEvent(
-                        guardada.getId(),
-                        guardada.getEstudianteId(),
-                        guardada.getMateria(),
-                        guardada.getNota());
-                notaKafkaProducer.publicarNota(evento);
-            }
-        } catch (AmqpException | KafkaException e) {
-            log.error("La evaluación id={} quedó guardada, pero no se pudo publicar el evento Kafka/Rabbit.",
+        } catch (AmqpException e) {
+            log.error("La evaluación id={} quedó guardada, pero no se pudo publicar el evento RabbitMQ.",
                     guardada.getId(), e);
+        }
+        if (guardada.getEstudianteId() != null) {
+            NotaEvent evento = new NotaEvent(
+                    guardada.getId(),
+                    guardada.getEstudianteId(),
+                    guardada.getMateria(),
+                    guardada.getNota());
+            try {
+                notaKafkaProducer.publicarNota(evento);
+            } catch (KafkaException e) {
+                log.error("La evaluación id={} quedó guardada, pero no se pudo publicar el evento Kafka.",
+                        guardada.getId(), e);
+            }
         }
         return guardada;
     }

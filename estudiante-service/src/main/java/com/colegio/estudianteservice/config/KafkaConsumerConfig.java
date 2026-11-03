@@ -1,5 +1,6 @@
 package com.colegio.estudianteservice.config;
 
+import com.colegio.estudianteservice.event.EstudianteCreadoEvent;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.ValidationException;
@@ -46,6 +47,9 @@ public class KafkaConsumerConfig {
     @Value("${kafka.topic.asistencia.dlt.name:asistencia.eventos.DLT}")
     private String asistenciaDltTopic;
 
+    @Value("${kafka.topic.estudiante.dlt.name:estudiantes.eventos.DLT}")
+    private String estudianteDltTopic;
+
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -64,7 +68,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, Object> kafkaTemplate) {
+    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, EstudianteCreadoEvent> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (ConsumerRecord<?, ?> record, Exception exception) -> {
                     String topic = record.topic();
@@ -73,6 +77,9 @@ public class KafkaConsumerConfig {
                     }
                     if (topic != null && topic.contains("asistencia")) {
                         return new TopicPartition(asistenciaDltTopic, record.partition());
+                    }
+                    if (topic != null && topic.contains("estudiantes")) {
+                        return new TopicPartition(estudianteDltTopic, record.partition());
                     }
                     return new TopicPartition(topic + ".DLT", record.partition());
                 });

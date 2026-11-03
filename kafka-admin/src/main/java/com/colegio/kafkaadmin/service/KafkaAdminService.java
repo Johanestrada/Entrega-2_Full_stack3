@@ -6,6 +6,8 @@ import com.colegio.kafkaadmin.dto.TopicPartitionRequest;
 import com.colegio.kafkaadmin.exception.ApiException;
 import com.colegio.kafkaadmin.exception.ResourceNotFoundException;
 import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
@@ -183,11 +185,18 @@ public class KafkaAdminService {
 
     public List<Map<String, Object>> listConsumerGroups() {
         try {
-            return adminClient.listConsumerGroups().all().get().stream()
+            Collection<ConsumerGroupListing> groups = adminClient.listConsumerGroups().all().get();
+            if (groups.isEmpty()) {
+                return List.of();
+            }
+            Map<String, ConsumerGroupDescription> descriptions = adminClient.describeConsumerGroups(
+                    groups.stream().map(ConsumerGroupListing::groupId).toList()).all().get();
+            return groups.stream()
                     .map(group -> Map.<String, Object>of(
                             "groupId", group.groupId(),
                             "isSimpleConsumerGroup", group.isSimpleConsumerGroup(),
-                            "state", "UNKNOWN"
+                            "state", descriptions.get(group.groupId()).state().name(),
+                            "memberCount", descriptions.get(group.groupId()).members().size()
                     )).toList();
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -234,47 +243,48 @@ public class KafkaAdminService {
         }
 
         try {
-            DescribeConsumerGroupsResult describeGroups = adminClient.describeConsumerGroups(List.of(groupId));
-            describeGroups.describedGroups().get(groupId).get();
+            ConsumerGroupDescription description = adminClient.describeConsumerGroups(List.of(groupId))
+                    .describedGroups().get(groupId).get();
+            if (description.state() == ConsumerGroupState.DEAD) {
+                throw new ResourceNotFoundException("El grupo de consumo '" + groupId + "' no existe");
+            }
 
-            List<TopicPartition> partitions = adminClient.listTopics().names().get().stream()
-                    .flatMap(topic -> adminClient.describeTopics(List.of(topic)).topicNameValues().values().stream())
-                    .map(f -> {
-                        try {
-                            return f.get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .flatMap(desc -> desc.partitions().stream().map(part -> new TopicPartition(desc.name(), part.partition())))
-                    .toList();
+            Map<TopicPartition, OffsetAndMetadata> committedOffsets =
+                    adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get();
+            Set<TopicPartition> partitions = new HashSet<>(committedOffsets.keySet());
+            description.members().forEach(member ->
+                    partitions.addAll(member.assignment().topicPartitions()));
+            if (partitions.isEmpty()) {
+                return List.of();
+            }
 
-            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> endOffsetsInfo = adminClient.listOffsets(partitions.stream()
-                    .collect(Collectors.toMap(tp -> tp, tp -> OffsetSpec.latest()))).all().get();
+            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> endOffsets =
+                    adminClient.listOffsets(partitions.stream()
+                            .collect(Collectors.toMap(partition -> partition, partition -> OffsetSpec.latest())))
+                            .all().get();
 
-            Map<TopicPartition, Long> endOffsets = endOffsetsInfo.entrySet().stream()
+            Map<TopicPartition, Long> consumedOffsets = committedOffsets.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset()));
 
-            Map<TopicPartition, Long> consumedOffsets = adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get().entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset()));
-
-            return partitions.stream().map(partition -> {
-                long end = endOffsets.getOrDefault(partition, 0L);
-                long consumed = consumedOffsets.getOrDefault(partition, 0L);
-                long lag = Math.max(0L, end - consumed);
-                return Map.<String, Object>of(
-                        "topic", partition.topic(),
-                        "partition", partition.partition(),
-                        "endOffset", end,
-                        "committedOffset", consumed,
-                        "lag", lag
-                );
+            return partitions.stream().sorted(Comparator.comparing(TopicPartition::topic)
+                    .thenComparingInt(TopicPartition::partition)).map(partition -> {
+                long end = endOffsets.get(partition).offset();
+                Long consumed = consumedOffsets.get(partition);
+                Map<String, Object> metrics = new LinkedHashMap<>();
+                metrics.put("topic", partition.topic());
+                metrics.put("partition", partition.partition());
+                metrics.put("endOffset", end);
+                metrics.put("committedOffset", consumed);
+                metrics.put("hasCommittedOffset", consumed != null);
+                metrics.put("lag", consumed == null ? null : Math.max(0L, end - consumed));
+                return metrics;
             }).toList();
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new ApiException("La consulta de lag fue interrumpida");
         } catch (ExecutionException ex) {
-            throw new ResourceNotFoundException("El grupo de consumo '" + groupId + "' no existe");
+            throw new ApiException("No se pudo consultar el lag del grupo '" + groupId + "': "
+                    + ex.getCause().getMessage());
         }
     }
 

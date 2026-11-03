@@ -43,11 +43,11 @@ public class EstudianteEventConsumer {
 
             // Confirma el mensaje cuando termina el procesamiento.
             channel.basicAck(tag, false);
-            log.info("✅ Mensaje confirmado en cola eventos.estudiante para evento={}", eventoNombre);
+            log.info("Mensaje confirmado en cola eventos.estudiante para evento={}", eventoNombre);
 
         } catch (IllegalArgumentException | MessageConversionException e) {
             // Rechaza los mensajes inválidos sin requeue para que lleguen a la DLQ.
-            log.error("❌ Error no recuperable procesando evento de Estudiante. Se envía a DLQ.", e);
+            log.error("Error no recuperable procesando evento de Estudiante. Se envía a DLQ.", e);
             try {
                 channel.basicNack(tag, false, false);
             } catch (Exception nackError) {
@@ -56,7 +56,7 @@ public class EstudianteEventConsumer {
         } catch (Exception e) {
             if (!redelivered) {
                 // Devuelve a la cola el mensaje que tuvo un fallo temporal por primera vez.
-                log.warn("⚠️ Fallo temporal en evento de Estudiante. Se reintenta una sola vez.", e);
+                log.warn("Fallo temporal en evento de Estudiante. Se reintenta una sola vez.", e);
                 try {
                     channel.basicNack(tag, false, true);
                 } catch (Exception nackError) {
@@ -66,7 +66,7 @@ public class EstudianteEventConsumer {
             }
 
             // Si el mensaje ya fue reintentado, lo rechaza y lo envía a la DLQ.
-            log.error("❌ Evento de Estudiante ya reintentado y sigue fallando. Se envía a DLQ.", e);
+            log.error("Error en evento de Estudiante ya reintentado y sigue fallando. Se envía a DLQ.", e);
             try {
                 channel.basicNack(tag, false, false);
             } catch (Exception nackError) {

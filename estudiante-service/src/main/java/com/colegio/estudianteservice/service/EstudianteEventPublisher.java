@@ -15,12 +15,12 @@ public class EstudianteEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(EstudianteEventPublisher.class);
 
-    private final RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate; // Inyección de RabbitTemplate para enviar mensajes a RabbitMQ
 
-    @Value("${rabbitmq.exchange.eventos:eventos.exchange}")
+    @Value("${rabbitmq.exchange.eventos:eventos.exchange}") // Nombre del exchange de eventos, con valor por defecto.
     private String exchange;
 
-    @Value("${rabbitmq.routing.estudiante.creado:evento.estudiante.creado}")
+    @Value("${rabbitmq.routing.estudiante.creado:evento.estudiante.creado}") // Routing key para el evento de estudiante creado, con valor por defecto.
     private String routingKey;
 
     public EstudianteEventPublisher(RabbitTemplate rabbitTemplate) {
@@ -39,15 +39,15 @@ public class EstudianteEventPublisher {
                 estudiante.getCurso()
         );
 
-        log.info("📤 Publicando evento estudiante.creado para id={}, nombre={}, curso={}",
+        log.info("Publicando evento estudiante.creado para id={}, nombre={}, curso={}",
                 evento.getId(), evento.getNombre(), evento.getCurso());
 
         rabbitTemplate.convertAndSend(exchange, routingKey, evento, message -> {
             message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return message;
+            return message; // routingKey es "evento.estudiante.creado" y exchange es "eventos.exchange"
         });
 
-        log.info("✅ Evento estudiante.creado publicado correctamente en exchange={} con routingKey={}",
+        log.info("Evento estudiante.creado publicado correctamente en exchange={} con routingKey={}",
                 exchange, routingKey);
     }
 }

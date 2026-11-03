@@ -37,17 +37,22 @@ public class AsistenciaService {
         Asistencia guardada = repository.save(asistencia);
         try {
             eventPublisher.publicarAsistenciaRegistrada(guardada);
-            if (guardada.getEstudianteId() != null) {
-                AsistenciaEvent evento = new AsistenciaEvent(
-                        guardada.getId(),
-                        guardada.getEstudianteId(),
-                        guardada.getFecha(),
-                        guardada.isPresente() ? "PRESENTE" : "AUSENTE");
-                asistenciaKafkaProducer.publicarAsistencia(evento);
-            }
-        } catch (AmqpException | KafkaException e) {
-            log.error("La asistencia id={} quedó guardada, pero no se pudo publicar el evento Kafka/Rabbit.",
+        } catch (AmqpException e) {
+            log.error("La asistencia id={} quedó guardada, pero no se pudo publicar el evento RabbitMQ.",
                     guardada.getId(), e);
+        }
+        if (guardada.getEstudianteId() != null) {
+            AsistenciaEvent evento = new AsistenciaEvent(
+                    guardada.getId(),
+                    guardada.getEstudianteId(),
+                    guardada.getFecha(),
+                    guardada.isPresente() ? "PRESENTE" : "AUSENTE");
+            try {
+                asistenciaKafkaProducer.publicarAsistencia(evento);
+            } catch (KafkaException e) {
+                log.error("La asistencia id={} quedó guardada, pero no se pudo publicar el evento Kafka.",
+                        guardada.getId(), e);
+            }
         }
         return guardada;
     }

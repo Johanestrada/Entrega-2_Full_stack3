@@ -3,13 +3,25 @@ target/
 *.iml
 frontend/node_modules/
 frontend/dist/
+
+# Local environment files; keep the template available for setup.
 .env
 .env.*
 !.env.example
 /env
+
+# Local Terraform state, variables, and plans may contain credentials.
 infrastructure/**/.terraform/
 infrastructure/**/*.tfstate
 infrastructure/**/*.tfstate.*
 infrastructure/aws-terraform/tf-state.json
 infrastructure/**/*.tfvars
 !infrastructure/**/terraform.tfvars.example
+infrastructure/**/*.tfplan
+
+# Private keys and local AWS credentials.
+*.pem
+*.p12
+*.pfx
+*.jks
+/.aws/

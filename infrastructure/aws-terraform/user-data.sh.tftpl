@@ -77,6 +77,8 @@ RABBITMQ_PASSWORD=${rabbit_password}
 RABBITMQ_MANAGEMENT_BIND_IP=0.0.0.0
 KAFKA_NETWORK_NAME=colegio-kafka-network
 KAFKA_BOOTSTRAP_SERVERS=kafka-1:19092,kafka-2:19093,kafka-3:19094
+KAFKA_UI_BIND_IP=0.0.0.0
+KAFKA_ADMIN_BIND_IP=0.0.0.0
 IMAGE_PREFIX=${image_prefix}
 IMAGE_TAG=${image_tag}
 EOF
@@ -123,12 +125,12 @@ if [ -n "$image_prefix_value" ] && docker compose pull; then
 	echo "Se usaran las imagenes publicadas configuradas."
 else
 	echo "No se pudieron descargar las imagenes; se construiran localmente."
-	if ! docker compose build frontend; then
+	if ! docker compose --parallel 1 build frontend; then
 		echo "No se pudo construir la imagen del frontend."
 		exit 1
 	fi
 	docker compose up -d --remove-orphans frontend
-	if ! docker compose build eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin kafka-admin; then
+	if ! docker compose --parallel 1 build eureka-server estudiante-service asistencia-service evaluacion-service bff-service rabbit-admin kafka-admin; then
 		echo "No se pudieron construir las imagenes backend."
 		exit 1
 	fi

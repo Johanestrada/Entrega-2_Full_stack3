@@ -28,6 +28,7 @@ locals {
   target_group_arn      = data.external.discovery.result.target_group_exists == "true" ? data.aws_lb_target_group.existing[0].arn : aws_lb_target_group.bff[0].arn
   vpc_link_id           = data.external.discovery.result.vpc_link_exists == "true" ? data.aws_apigatewayv2_vpc_link.existing[0].id : aws_apigatewayv2_vpc_link.this[0].id
   rds_address           = aws_db_instance.mysql.address
+  admin_panels_cidr     = var.rabbitmq_admin_cidr
 
   tags = {
     Project     = var.project

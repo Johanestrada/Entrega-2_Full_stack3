@@ -95,6 +95,28 @@ resource "aws_security_group" "ec2" {
     }
   }
 
+  dynamic "ingress" {
+    for_each = local.admin_panels_cidr == "" ? [] : [local.admin_panels_cidr]
+    content {
+      protocol    = "tcp"
+      from_port   = 8090
+      to_port     = 8090
+      cidr_blocks = [ingress.value]
+      description = "Temporary Kafka UI access"
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = local.admin_panels_cidr == "" ? [] : [local.admin_panels_cidr]
+    content {
+      protocol    = "tcp"
+      from_port   = 8086
+      to_port     = 8086
+      cidr_blocks = [ingress.value]
+      description = "Temporary Kafka Admin API access"
+    }
+  }
+
   egress {
     protocol    = "-1"
     from_port   = 0
@@ -113,6 +135,30 @@ resource "aws_security_group_rule" "rabbitmq_management_existing_ec2" {
   to_port           = 15672
   cidr_blocks       = [var.rabbitmq_admin_cidr]
   description       = "Temporary RabbitMQ Management UI access"
+}
+
+resource "aws_security_group_rule" "kafka_ui_existing_ec2" {
+  count = var.existing_ec2_security_group_id != "" && local.admin_panels_cidr != "" ? 1 : 0
+
+  type              = "ingress"
+  security_group_id = local.ec2_security_group_id
+  protocol          = "tcp"
+  from_port         = 8090
+  to_port           = 8090
+  cidr_blocks       = [local.admin_panels_cidr]
+  description       = "Temporary Kafka UI access"
+}
+
+resource "aws_security_group_rule" "kafka_admin_existing_ec2" {
+  count = var.existing_ec2_security_group_id != "" && local.admin_panels_cidr != "" ? 1 : 0
+
+  type              = "ingress"
+  security_group_id = local.ec2_security_group_id
+  protocol          = "tcp"
+  from_port         = 8086
+  to_port           = 8086
+  cidr_blocks       = [local.admin_panels_cidr]
+  description       = "Temporary Kafka Admin API access"
 }
 
 resource "aws_security_group" "rds" {

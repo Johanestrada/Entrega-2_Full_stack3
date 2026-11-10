@@ -17,14 +17,16 @@ mysql_admin_password = "CAMBIAR_ESTO"
 rabbitmq_username = "colegio_app"
 rabbitmq_password = "CAMBIAR_POR_UN_SECRETO_DE_6_A_128_CARACTERES"
 
-# Accesos administrativos no habilitados por defecto; configurar una IP autorizada /32.
+# Terraform detecta la IP pública del equipo que ejecuta apply para accesos administrativos.
+# CIDR explícito reemplaza el valor automático; auto_detect_public_ip=false deshabilita el fallback.
 admin_cidr = ""
 rabbitmq_admin_cidr = ""
+auto_detect_public_ip = true
 
 # Vacio: Compose intentara pull y luego construira localmente si no hay imagen publicada.
 image_prefix = ""
 image_tag = "latest"
-instance_type = "t3.medium"
+instance_type = "t3.large"
 # Nombre de un key pair ya creado en AWS us-east-1. Dejar vacío si no se requiere SSH.
 ec2_key_name = ""
 

@@ -18,6 +18,9 @@ locals {
 
   public_subnet_id = length(local.public_subnet_ids) > 0 ? local.public_subnet_ids[0] : ""
 
+  auto_admin_cidr = var.auto_detect_public_ip ? "${try(data.external.public_ip[0].result.ipv4, "")}/32" : ""
+  admin_ssh_cidr  = var.admin_cidr != "" ? var.admin_cidr : local.auto_admin_cidr
+
   vpc_link_security_group_id = var.existing_vpc_link_security_group_id != "" ? var.existing_vpc_link_security_group_id : (
     data.external.discovery.result.vpc_link_security_group_exists == "true" ? data.aws_security_group.vpc_link_existing[0].id : aws_security_group.vpc_link[0].id
   )
@@ -28,7 +31,7 @@ locals {
   target_group_arn      = data.external.discovery.result.target_group_exists == "true" ? data.aws_lb_target_group.existing[0].arn : aws_lb_target_group.bff[0].arn
   vpc_link_id           = data.external.discovery.result.vpc_link_exists == "true" ? data.aws_apigatewayv2_vpc_link.existing[0].id : aws_apigatewayv2_vpc_link.this[0].id
   rds_address           = aws_db_instance.mysql.address
-  admin_panels_cidr     = var.rabbitmq_admin_cidr
+  admin_panels_cidr     = var.rabbitmq_admin_cidr != "" ? var.rabbitmq_admin_cidr : local.auto_admin_cidr
 
   tags = {
     Project     = var.project

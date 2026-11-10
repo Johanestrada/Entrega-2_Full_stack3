@@ -41,13 +41,18 @@ variable "enable_cloudfront" {
 }
 variable "admin_cidr" {
   type        = string
-  description = "CIDR permitido para SSH; vacío deshabilita el acceso SSH."
+  description = "CIDR SSH opcional que reemplaza la IP detectada automáticamente."
   default     = ""
 }
 variable "rabbitmq_admin_cidr" {
   type        = string
-  description = "CIDR permitido para el panel RabbitMQ; vacío deshabilita el acceso."
+  description = "CIDR opcional para los paneles RabbitMQ y Kafka que reemplaza la IP detectada automáticamente."
   default     = ""
+}
+variable "auto_detect_public_ip" {
+  type        = bool
+  description = "Detecta la IP pública del equipo que ejecuta Terraform y la autoriza para SSH y los paneles administrativos cuando sus CIDR no se especifican."
+  default     = true
 }
 variable "image_prefix" {
   type    = string
@@ -87,7 +92,7 @@ variable "rabbitmq_password" {
 }
 variable "instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "t3.large"
 }
 variable "ec2_key_name" {
   type        = string

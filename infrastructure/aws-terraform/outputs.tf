@@ -14,17 +14,17 @@ output "url_frontend_ec2" {
 }
 
 output "url_panel_rabbitmq" {
-  description = "URL del panel de administración RabbitMQ (accesible solo desde rabbitmq_admin_cidr)."
+  description = "URL del panel RabbitMQ (accesible desde la IP detectada o rabbitmq_admin_cidr)."
   value       = "http://${aws_eip.app.public_dns}:15672"
 }
 
 output "url_panel_kafka" {
-  description = "URL del panel Kafka UI (accesible desde rabbitmq_admin_cidr)."
+  description = "URL de Kafka UI (accesible desde la IP detectada o rabbitmq_admin_cidr)."
   value       = "http://${aws_eip.app.public_dns}:8090"
 }
 
 output "url_kafka_admin" {
-  description = "Swagger UI del servicio Kafka Admin (accesible desde rabbitmq_admin_cidr)."
+  description = "Swagger UI de Kafka Admin (accesible desde la IP detectada o rabbitmq_admin_cidr)."
   value       = "http://${aws_eip.app.public_dns}:8086/swagger-ui/index.html"
 }
 

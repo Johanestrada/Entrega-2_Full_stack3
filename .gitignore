@@ -6,6 +6,7 @@ frontend/dist/
 .env
 .env.*
 !.env.example
+*.pem
 /env
 infrastructure/**/.terraform/
 infrastructure/**/*.tfstate

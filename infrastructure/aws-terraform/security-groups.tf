@@ -74,7 +74,7 @@ resource "aws_security_group" "ec2" {
   }
 
   dynamic "ingress" {
-    for_each = var.admin_cidr == "" ? [] : [var.admin_cidr]
+    for_each = local.admin_ssh_cidr == "" ? [] : [local.admin_ssh_cidr]
     content {
       protocol    = "tcp"
       from_port   = 22
@@ -85,7 +85,7 @@ resource "aws_security_group" "ec2" {
   }
 
   dynamic "ingress" {
-    for_each = var.rabbitmq_admin_cidr == "" ? [] : [var.rabbitmq_admin_cidr]
+    for_each = local.admin_panels_cidr == "" ? [] : [local.admin_panels_cidr]
     content {
       protocol    = "tcp"
       from_port   = 15672
@@ -126,14 +126,14 @@ resource "aws_security_group" "ec2" {
 }
 
 resource "aws_security_group_rule" "rabbitmq_management_existing_ec2" {
-  count = var.existing_ec2_security_group_id != "" && var.rabbitmq_admin_cidr != "" ? 1 : 0
+  count = var.existing_ec2_security_group_id != "" && local.admin_panels_cidr != "" ? 1 : 0
 
   type              = "ingress"
   security_group_id = local.ec2_security_group_id
   protocol          = "tcp"
   from_port         = 15672
   to_port           = 15672
-  cidr_blocks       = [var.rabbitmq_admin_cidr]
+  cidr_blocks       = [local.admin_panels_cidr]
   description       = "Temporary RabbitMQ Management UI access"
 }
 

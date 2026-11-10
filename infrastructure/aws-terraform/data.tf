@@ -77,11 +77,24 @@ data "external" "discovery" {
   ]
 
   query = {
-    region         = var.aws_region
-    name           = local.name
-    vpc_id         = local.vpc_id
+    region            = var.aws_region
+    name              = local.name
+    vpc_id            = local.vpc_id
     target_group_name = local.target_group_name
-    vpc_link_name  = var.vpc_link_name
-    rds_identifier = var.existing_rds_identifier
+    vpc_link_name     = var.vpc_link_name
+    rds_identifier    = var.existing_rds_identifier
   }
+}
+
+data "external" "public_ip" {
+  count = var.auto_detect_public_ip ? 1 : 0
+
+  program = [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "${path.module}/get-public-ip.ps1",
+  ]
 }
